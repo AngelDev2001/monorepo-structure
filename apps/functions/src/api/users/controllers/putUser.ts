@@ -3,8 +3,13 @@ import assert from "assert";
 import { Response, Request, NextFunction } from "express";
 import { isEmpty } from "lodash";
 
-import { auth, fetchCollection, fetchDocument, firestore } from "../../../_firebase";
-import { User } from "../../../globalTypes";
+import {
+  auth,
+  fetchCollection,
+  fetchDocument,
+  firestore,
+} from "../../../_firebase";
+import { User } from "../../../globalTypes.js";
 import { defaultFirestoreProps } from "../../../utils";
 
 type Params = { userId: string };
@@ -71,20 +76,27 @@ const updateUserAuth = async (
   await auth.updateUser(user.id, {
     ...(changeEmail && { email: user?.email || undefined }),
     ...(changePhoneNumber && {
-      phoneNumber: user?.phone ? `${user.phone?.prefix || "+51"}${user.phone.number}` : undefined,
+      phoneNumber: user?.phone
+        ? `${user.phone?.prefix || "+51"}${user.phone.number}`
+        : undefined,
     }),
   });
 };
 
 const isEmailExists = async (email: string | null): Promise<boolean> => {
   const users = await fetchCollection<User>(
-    firestore.collection("users").where("isDeleted", "==", false).where("email", "==", email)
+    firestore
+      .collection("users")
+      .where("isDeleted", "==", false)
+      .where("email", "==", email)
   );
 
   return !isEmpty(users);
 };
 
-const isPhoneNumberExists = async (phoneNumber: string | null): Promise<boolean> => {
+const isPhoneNumberExists = async (
+  phoneNumber: string | null
+): Promise<boolean> => {
   const users = await fetchCollection<User>(
     firestore
       .collection("users")
@@ -96,7 +108,9 @@ const isPhoneNumberExists = async (phoneNumber: string | null): Promise<boolean>
 };
 
 const fetchUser = async (userId: string): Promise<User> => {
-  const user = await fetchDocument<User>(firestore.collection("users").doc(userId));
+  const user = await fetchDocument<User>(
+    firestore.collection("users").doc(userId)
+  );
 
   assert(user, `User doesn't exist: ${userId}`);
 

@@ -1,3 +1,11 @@
+# Archivos TypeScript compilados accidentalmente en src
+src/**/*.js
+src/**/*.js.map
+
+# Excepciones (si tienes archivos .js legítimos en src, descoméntalos)
+ !src/**/*.config.js
+ !src/vite-env.d.ts
+
 # Logs
 logs
 *.log

@@ -2,7 +2,6 @@ import express, { Router } from "express";
 
 import { getUser, getUsers, postUser, putUser } from "../controllers";
 
- 
 const router: Router = express.Router();
 
 router.get("/", getUsers);

@@ -1,8 +1,12 @@
 import express, { Router } from "express";
 
-import { getQuotation, getQuotations, postQuotation, putQuotation } from "../controllers";
+import {
+  getQuotation,
+  getQuotations,
+  postQuotation,
+  putQuotation,
+} from "../controllers";
 
- 
 const router: Router = express.Router();
 
 router.get("/", getQuotations);

@@ -1,1 +1,2 @@
-export * from "./AdminLayout.tsx";
+export * from "./AdminLayout";
+export * from "./PublicLayout";

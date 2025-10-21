@@ -2,7 +2,11 @@ import { Response, Request, NextFunction } from "express";
 
 import { fetchUsers } from "../../../_firebase/collections";
 
-export const getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getUsers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   console.log("「Get users data」Initialize", {
     params: req.params,
   });

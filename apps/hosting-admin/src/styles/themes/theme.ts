@@ -37,24 +37,48 @@ export const theme = {
     xx_large: "1.6em",
     xxx_large: "1.8em",
   },
+  // colors: {
+  //   primary: "#FFC107",
+  //   secondary: "#000000",
+  //   tertiary: "#FFFFFF",
+  //
+  //   font1: "#333333",
+  //   font2: "#E0E0E0",
+  //   font3: "#007BFF",
+  //
+  //   success: "#0ECB81",
+  //   info: "#0795FF",
+  //   warning: "#FF9800",
+  //   error: "#F6465D",
+  //
+  //   black: "#090B0D",
+  //   white: "#FFFFFF",
+  //   dark: "#090B0D",
+  //   light: "#ECECEC",
+  //   gray: "#79838C",
+  // },
   colors: {
-    primary: "#FFC107",
-    secondary: "#000000",
-    tertiary: "#FFFFFF",
+    // Colores principales - IDENTIDAD SERVITEC
+    primary: "#FFC107", // Amarillo corporativo del logo ⭐
+    secondary: "#1A1D23", // Gris oscuro para fondos
+    tertiary: "#F5F5F5", // Blanco suave
 
-    font1: "#333333",
-    font2: "#E0E0E0",
-    font3: "#007BFF",
+    // Fuentes optimizadas para dark mode
+    font1: "#E8E8E8", // Texto principal claro
+    font2: "#9CA3AF", // Texto secundario (gris medio)
+    font3: "#FFC107", // Links/acciones en amarillo corporativo 🔗
 
-    success: "#0ECB81",
-    info: "#0795FF",
-    warning: "#FF9800",
-    error: "#F6465D",
+    // Estados - Mantienen buena visibilidad
+    success: "#10B981", // Verde
+    info: "#3B82F6", // Azul (este es el "azulino" que mencionas)
+    warning: "#F59E0B", // Naranja advertencia
+    error: "#EF4444", // Rojo
 
-    black: "#090B0D",
+    // Bases
+    black: "#0F1419", // Negro suave
     white: "#FFFFFF",
-    dark: "#090B0D",
-    light: "#ECECEC",
-    gray: "#79838C",
+    dark: "#1A1D23", // Fondo principal dark
+    light: "#F9FAFB", // Fondos claros
+    gray: "#6B7280", // Gris neutro
   },
 } as const;

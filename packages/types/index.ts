@@ -17,11 +17,11 @@ export interface User {
   maternalSurname: string;
   email: string;
   document: {
-    type: 'DNI' | 'RUC' | 'CE';
+    type: "DNI" | "RUC" | "CE";
     number: string;
   };
   phone: Phone;
-  gender: 'male' | 'female' | 'other';
+  gender: "male" | "female" | "other";
 }
 
 export interface UpdateUser extends Partial<User> {}

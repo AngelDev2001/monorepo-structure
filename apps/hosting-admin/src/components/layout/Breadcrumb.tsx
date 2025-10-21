@@ -1,16 +1,68 @@
 import { capitalize } from "lodash";
-import Breadcrumb from "antd/lib/breadcrumb";
+import { Breadcrumb } from "antd";
+import styled from "styled-components";
+import { theme } from "../../styles";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faHome } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 
 export const BreadcrumbLayout = () => {
-  const legend = window.location.pathname.split("/").filter((legend) => legend);
+  const navigate = useNavigate();
+  const pathnames = window.location.pathname.split("/").filter((path) => path);
 
-  return (
-    <Breadcrumb style={{ margin: "16px 0", fontSize: 12 }}>
-      {(legend || []).map((legend, index) => (
-        <Breadcrumb.Item key={index}>
-          {legend === "entities" ? "Entidad (G.U)" : capitalize(legend)}
-        </Breadcrumb.Item>
-      ))}
-    </Breadcrumb>
-  );
+  const breadcrumbItems = [
+    {
+      title: <FontAwesomeIcon icon={faHome} />,
+      onClick: () => navigate("/home"),
+      className: "breadcrumb-home",
+    },
+    ...pathnames.map((path, index) => {
+      const url = `/${pathnames.slice(0, index + 1).join("/")}`;
+      return {
+        title: path === "entities" ? "Entidad (G.U)" : capitalize(path),
+        onClick: index < pathnames.length - 1 ? () => navigate(url) : undefined,
+      };
+    }),
+  ];
+
+  return <BreadcrumbContainer items={breadcrumbItems} />;
 };
+
+const BreadcrumbContainer = styled(Breadcrumb)`
+  margin: 16px 0;
+  padding: 0.8em 0;
+
+  /* Items del breadcrumb */
+  .ant-breadcrumb-link {
+    color: ${theme.colors.font2};
+    font-size: ${theme.font_sizes.small};
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: ${theme.colors.primary};
+    }
+  }
+
+  /* Último item (activo) */
+  li:last-child .ant-breadcrumb-link {
+    color: ${theme.colors.font1};
+    font-weight: ${theme.font_weight.medium};
+  }
+
+  /* Separadores */
+  .ant-breadcrumb-separator {
+    color: ${theme.colors.gray};
+    margin: 0 0.5em;
+  }
+
+  /* Primer item (home icon) */
+  li:first-child .ant-breadcrumb-link {
+    color: ${theme.colors.font2};
+    display: flex;
+    align-items: center;
+
+    &:hover {
+      color: ${theme.colors.primary};
+    }
+  }
+`;

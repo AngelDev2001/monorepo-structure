@@ -1,15 +1,23 @@
 export * from "./firestore";
 
-import * as admin from "firebase-admin";
+import { initializeApp } from "firebase-admin/app";
+import { getFirestore, FieldValue, Timestamp } from "firebase-admin/firestore";
+import { getStorage } from "firebase-admin/storage";
+import { getAuth } from "firebase-admin/auth";
 
-admin.initializeApp();
+initializeApp();
 
-export const firestore = admin.firestore();
-export const storage = admin.storage();
-export const auth = admin.auth();
+export const firestore = getFirestore();
+export const storage = getStorage();
+export const auth = getAuth();
 
 const projectId = process.env.GCLOUD_PROJECT;
 
+const currentEnvironment =
+  projectId === "servitec-peru" ? "production" : "development";
+
+export const isProduction = currentEnvironment === "production";
+
 export const bucketAtFunction = projectId + ".appspot.com";
-export const firestoreFieldValue = admin.firestore.FieldValue;
-export const firestoreTimestamp = admin.firestore.Timestamp;
+export const firestoreFieldValue = FieldValue;
+export const firestoreTimestamp = Timestamp;

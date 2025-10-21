@@ -11,7 +11,7 @@ type WriteResult = FirebaseFirestore.WriteResult;
 export type WhereClauses<T extends ObjectType> = [
   NestedKeyOf<T>,
   FirebaseFirestore.WhereFilterOp,
-  unknown
+  unknown,
 ];
 
 export const querySnapshotToArray = <T extends ObjectType>(

@@ -5,8 +5,11 @@ import { auth, fetchCollection, firestore } from "../../../_firebase";
 import { getUserId } from "../../../_firebase/collections";
 import { defaultFirestoreProps } from "../../../utils/defaultFirestoreProps";
 
-
-export const postUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const postUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   const { body: user } = req;
 
   console.log("「Add user」Initialize", user, {
@@ -62,13 +65,18 @@ const addUserAuth = async (user: User): Promise<void> => {
   await auth.createUser({
     uid: user.id,
     email: user?.email || undefined,
-    phoneNumber: user?.phone ? `${user.phone?.prefix || "+51"}${user.phone.number}` : undefined,
+    phoneNumber: user?.phone
+      ? `${user.phone?.prefix || "+51"}${user.phone.number}`
+      : undefined,
   });
 };
 
 const isEmailExists = async (email: string | null): Promise<boolean> => {
   const users = await fetchCollection<User>(
-    firestore.collection("users").where("isDeleted", "==", false).where("email", "==", email)
+    firestore
+      .collection("users")
+      .where("isDeleted", "==", false)
+      .where("email", "==", email)
   );
 
   return !isEmpty(users);
@@ -76,7 +84,10 @@ const isEmailExists = async (email: string | null): Promise<boolean> => {
 
 const isDniExists = async (dni: string | null): Promise<boolean> => {
   const users = await fetchCollection<User>(
-    firestore.collection("users").where("isDeleted", "==", false).where("dni", "==", dni)
+    firestore
+      .collection("users")
+      .where("isDeleted", "==", false)
+      .where("dni", "==", dni)
   );
 
   return !isEmpty(users);

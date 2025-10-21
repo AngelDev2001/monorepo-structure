@@ -1,8 +1,12 @@
 import express, { Router } from "express";
 
-import { getAssistance, getAssistances, postAssistance, putAssistance } from "../controllers";
+import {
+  getAssistance,
+  getAssistances,
+  postAssistance,
+  putAssistance,
+} from "../controllers";
 
- 
 const router: Router = express.Router();
 
 router.get("/", getAssistances);

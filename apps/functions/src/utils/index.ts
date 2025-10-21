@@ -1,1 +1,1 @@
-export * from "./defaultFirestoreProps.js"
+export * from "./defaultFirestoreProps.js";

@@ -1,0 +1,1 @@
+{"version":3,"file":"getQuotations.d.ts","sourceRoot":"","sources":["../../../../src/api/quotations/controllers/getQuotations.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,QAAQ,EAAE,OAAO,EAAE,YAAY,EAAE,MAAM,SAAS,CAAC;AAI1D,eAAO,MAAM,aAAa,GACxB,KAAK,OAAO,EACZ,KAAK,QAAQ,EACb,MAAM,YAAY,KACjB,OAAO,CAAC,IAAI,CAUd,CAAC"}

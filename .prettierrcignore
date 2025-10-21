@@ -1,0 +1,37 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+.next
+dist
+build
+lib
+out
+coverage
+
+# Generated files
+.turbo
+*.tsbuildinfo
+next-env.d.ts
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Cache
+.cache
+.eslintcache
+
+# OS
+.DS_Store
+Thumbs.db

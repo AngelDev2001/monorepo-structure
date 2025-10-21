@@ -1,0 +1,26 @@
+{
+  "development": {
+    "version": "0.0.1",
+    "firebaseApp": {
+      "apiKey": "AIzaSyBdb4Z5JOc3GHXTsOiCgOJgdVYkJb4WEIA",
+      "authDomain": "servitec-peru.firebaseapp.com",
+      "projectId": "servitec-peru",
+      "storageBucket": "servitec-peru.firebasestorage.app",
+      "messagingSenderId": "253941959732",
+      "appId": "1:253941959732:web:4af2a236ed20ade1c8ce61"
+    },
+    "apiUrl": "https://us-central1-servitec-peru.cloudfunctions.net/api"
+  },
+  "production": {
+    "version": "0.0.1",
+    "firebaseApp": {
+      "apiKey": "AIzaSyBdb4Z5JOc3GHXTsOiCgOJgdVYkJb4WEIA",
+      "authDomain": "servitec-peru.firebaseapp.com",
+      "projectId": "servitec-peru",
+      "storageBucket": "servitec-peru.firebasestorage.app",
+      "messagingSenderId": "253941959732",
+      "appId": "1:253941959732:web:4af2a236ed20ade1c8ce61"
+    },
+    "apiUrl": "https://us-central1-servitec-peru.cloudfunctions.net/api"
+  }
+}

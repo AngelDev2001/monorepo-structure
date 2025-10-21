@@ -1,0 +1,10 @@
+{
+  "extends": "@servitec-peru/typescript-config/base.json",
+  "compilerOptions": {
+    "declaration": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": true
+  },
+  "include": ["src/**/*"]
+}

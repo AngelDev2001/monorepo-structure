@@ -17,6 +17,12 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    /* ✅ SOBRESCRIBE las opciones problemáticas del base */
+    "declaration": false,
+    "declarationMap": false,
+    "allowJs": false,
+
+
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,

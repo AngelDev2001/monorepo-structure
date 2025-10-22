@@ -1,12 +1,25 @@
 import styled, { css } from "styled-components";
 import { capitalize, startCase } from "lodash";
-import { keyframes } from "../../../styles";
+import { keyframes, theme } from "../../../styles";
 import Typography from "antd/lib/typography";
 import SpaceAntd from "antd/lib/space";
 import { lighten } from "polished";
-import type { BaseContainerProps } from "../../../globalTypes";
+import type { ReactNode } from "react";
 
 const { Text } = Typography;
+
+export interface BaseContainerProps {
+  value?: boolean;
+  required?: boolean;
+  error?: boolean;
+  hidden?: boolean;
+  label?: string;
+  disabled?: boolean;
+  componentId?: string;
+  children?: ReactNode;
+  animation?: boolean;
+  helperText?: string;
+}
 
 interface GroupProps extends BaseContainerProps {}
 
@@ -33,18 +46,19 @@ export const Group = ({
 );
 
 const Container = styled.fieldset<Pick<GroupProps, "error">>`
-  border-radius: ${({ theme }) => theme.border_radius.x_small};
+  border-radius: ${() => theme.border_radius.x_small};
   border: solid 1px
-    ${({ error, theme }) => (error ? theme.colors.error : theme.colors.light)};
+    ${({ error }) =>
+      error ? theme.colors.error : lighten(0.1, theme.colors.secondary)};
   padding: 0.5em 1em;
   margin-top: -7px;
-  background: ${({ theme }) => lighten(0.07, theme.colors.light)};
+  background: ${() => lighten(0.02, theme.colors.secondary)};
 `;
 
 const Legend = styled.legend<Pick<GroupProps, "required" | "error">>`
-  ${({ error, theme, required }) => css`
-    background: ${theme.colors.light};
-    color: ${error ? theme.colors.error : theme.colors.black};
+  ${({ error, required }) => css`
+    background: ${theme.colors.secondary};
+    color: ${error ? theme.colors.error : theme.colors.font1};
     border-radius: ${theme.border_radius.x_small};
     font-size: 0.9em;
     font-weight: 600;
@@ -57,7 +71,7 @@ const Legend = styled.legend<Pick<GroupProps, "required" | "error">>`
       ::after {
         display: inline-block;
         margin-left: 0.2rem;
-        color: ${error ? theme.colors.error : theme.colors.error};
+        color: ${error ? theme.colors.error : theme.colors.primary};
         font-size: ${theme.font_sizes.small};
         line-height: 1;
         content: "*";
@@ -71,8 +85,8 @@ const SpaceStyled = styled(SpaceAntd)`
 `;
 
 const Error = styled(Text)<Pick<GroupProps, "error">>`
-  color: ${({ theme }) => theme.colors.error};
-  font-size: ${({ theme }) => theme.font_sizes.x_small};
+  color: ${() => theme.colors.error};
+  font-size: ${() => theme.font_sizes.x_small};
   ${({ error }) =>
     error &&
     css`

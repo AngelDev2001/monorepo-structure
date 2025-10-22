@@ -1,11 +1,24 @@
 import styled, { css } from "styled-components";
 import { capitalize, isEmpty, startCase, toString } from "lodash";
-import { classNames, keyframes } from "../../../styles";
+import { classNames, keyframes, theme } from "../../../styles";
 import Typography from "antd/lib/typography";
 import { lighten } from "polished";
-import type { BaseContainerProps } from "../../../globalTypes";
+import type { ReactNode } from "react";
 
 const { Text } = Typography;
+
+export interface BaseContainerProps {
+  value?: boolean;
+  required?: boolean;
+  error?: boolean;
+  hidden?: boolean;
+  label?: string;
+  disabled?: boolean;
+  componentId?: string;
+  children?: ReactNode;
+  animation?: boolean;
+  helperText?: string;
+}
 
 interface FilledProps extends BaseContainerProps {}
 
@@ -44,13 +57,13 @@ export const Filled = ({
 
 const labelAnimate = css`
   padding: 0 5px;
-  border-radius: ${({ theme }) => theme.border_radius.xx_small};
+  border-radius: ${() => theme.border_radius.xx_small};
   top: -9px;
   left: 6px;
   bottom: auto;
   font-weight: 600;
-  font-size: ${({ theme }) => theme.font_sizes.x_small};
-  background-color: ${({ theme }) => theme.colors.white};
+  font-size: ${() => theme.font_sizes.x_small};
+  background-color: ${() => theme.colors.secondary};
 `;
 
 const Container = styled.div<
@@ -59,12 +72,15 @@ const Container = styled.div<
     "error" | "required" | "disabled" | "value" | "animation" | "hidden"
   >
 >`
-  ${({ theme, error, required, disabled, value, animation, hidden }) => css`
+  ${({ error, required, disabled, value, animation, hidden }) => css`
     position: relative;
     width: inherit;
     border-radius: ${theme.border_radius.xx_small};
-    background: ${disabled ? theme.colors.light : theme.colors.white};
-    border: 1px solid ${error ? theme.colors.error : theme.colors.gray};
+    background: ${disabled
+      ? lighten(0.02, theme.colors.secondary)
+      : theme.colors.secondary};
+    border: 1px solid
+      ${error ? theme.colors.error : lighten(0.1, theme.colors.secondary)};
     animation: ${error && keyframes.shake} 340ms
       cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 
@@ -73,8 +89,8 @@ const Container = styled.div<
       border-color: ${error
         ? theme.colors.error
         : disabled
-          ? theme.colors.gray
-          : lighten(0.1, theme.colors.primary)};
+          ? lighten(0.1, theme.colors.secondary)
+          : theme.colors.primary};
     }
 
     .item-label,
@@ -83,7 +99,7 @@ const Container = styled.div<
         ? theme.colors.error
         : disabled
           ? theme.colors.gray
-          : lighten(0.1, theme.colors.font1)};
+          : theme.colors.font2};
     }
 
     .item-label {
@@ -96,7 +112,7 @@ const Container = styled.div<
       display: flex;
       align-items: center;
       background-color: transparent;
-      color: ${error ? theme.colors.error : theme.colors.black};
+      color: ${error ? theme.colors.error : theme.colors.font2};
       font-size: ${theme.font_sizes.small};
       transition:
         all ease-in-out 150ms,
@@ -116,7 +132,7 @@ const Container = styled.div<
         ::after {
           display: inline-block;
           margin-left: 0.2rem;
-          color: ${error ? theme.colors.error : theme.colors.black};
+          color: ${error ? theme.colors.error : theme.colors.primary};
           font-size: ${theme.font_sizes.small};
           line-height: 1;
           content: "*";
@@ -130,15 +146,15 @@ const Container = styled.div<
         color: ${error
           ? theme.colors.error
           : disabled
-            ? theme.colors.black
-            : lighten(0.1, theme.colors.primary)};
+            ? theme.colors.font2
+            : theme.colors.primary};
       }
 
       &:focus-within + .item-label,
       &:-webkit-autofill + .item-label {
         ${labelAnimate};
 
-        color: ${error ? theme.colors.error : lighten(0.1, theme.colors.font1)};
+        color: ${error ? theme.colors.error : theme.colors.primary};
 
         ${error &&
         css`
@@ -146,21 +162,20 @@ const Container = styled.div<
         `}
 
         &:after {
-          color: ${error
-            ? theme.colors.error
-            : lighten(0.1, theme.colors.font1)};
+          color: ${error ? theme.colors.error : theme.colors.primary};
         }
       }
 
       input:-webkit-autofill {
-        -webkit-text-fill-color: #fff;
+        -webkit-text-fill-color: ${theme.colors.font1};
+        -webkit-box-shadow: 0 0 0 1000px ${theme.colors.secondary} inset;
         ${value &&
         css`
-          -webkit-text-fill-color: ${({ theme }) => theme.colors.font1};
+          -webkit-text-fill-color: ${theme.colors.font1};
         `};
 
         &:focus {
-          -webkit-text-fill-color: ${({ theme }) => theme.colors.font1};
+          -webkit-text-fill-color: ${theme.colors.font1};
         }
       }
 
@@ -179,17 +194,19 @@ const Container = styled.div<
       }
 
       .ant-input-group-addon {
-        border: 0 solid #d9d9d9;
-        border-left: 1px solid #d9d9d9;
+        border: 0 solid ${lighten(0.1, theme.colors.secondary)};
+        border-left: 1px solid ${lighten(0.1, theme.colors.secondary)};
+        background: ${lighten(0.05, theme.colors.secondary)};
+        color: ${theme.colors.font2};
       }
     }
   `}
 `;
 
 const Error = styled(Text)<Pick<FilledProps, "error">>`
-  ${({ error, theme }) => css`
+  ${({ error }) => css`
     color: ${theme.colors.error};
-    font-size: ${({ theme }) => theme.font_sizes.x_small};
+    font-size: ${theme.font_sizes.x_small};
     ${error &&
     css`
       animation: ${keyframes.shake} 340ms;

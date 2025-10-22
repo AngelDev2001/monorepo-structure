@@ -1,33 +1,16 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import * as A from "../pages";
-import { AdminLayout, PublicLayout } from "../components/layout";
+import { AdminLayout } from "../components/layout";
 import { PrivateRoute } from "./PrivateRoute";
 import { PublicRoute } from "./PublicRoute";
 
 export function Router() {
   return (
     <Routes>
-      {/* Redirección raíz */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
-
       {/* ========== RUTAS PÚBLICAS ========== */}
       <Route element={<PublicRoute />}>
-        <Route
-          path="/login"
-          element={
-            <PublicLayout>
-              <A.Login />
-            </PublicLayout>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <PublicLayout>
-              <A.Register />
-            </PublicLayout>
-          }
-        />
+        <Route path="/" element={<A.Login />} />
+        <Route path="/register" element={<A.Register />} />
       </Route>
 
       {/* ========== RUTAS PRIVADAS ========== */}

@@ -17,13 +17,14 @@ import {
   Divider,
 } from "antd";
 
-export * from "./Legend.tsx";
-export * from "./Form.tsx";
-export * from "./Input.tsx";
-export * from "./notification.tsx";
-export * from "./Spinner.tsx";
-export * from "./TextArea.tsx";
-export * from "./notification.tsx";
+export * from "./Legend";
+export * from "./Form";
+export * from "./Input";
+export * from "./InputCode";
+export * from "./notification";
+export * from "./Spinner";
+export * from "./TextArea";
+export * from "./notification";
 
 export {
   Layout,

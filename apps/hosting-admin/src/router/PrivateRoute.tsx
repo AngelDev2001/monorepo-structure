@@ -7,7 +7,7 @@ export const PrivateRoute = () => {
 
   // Si no está autenticado, redirige al login
   if (!authUser) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/" state={{ from: location }} replace />;
   }
 
   // Si está autenticado, renderiza las rutas hijas

@@ -1,6 +1,21 @@
 import OTPInput from "react-otp-input";
 import styled, { css } from "styled-components";
 import { keyframes, mediaQuery, theme } from "../../styles";
+import { lighten } from "polished";
+
+interface InputCodeProps {
+  value: string;
+  required?: boolean;
+  hidden?: boolean;
+  error?: boolean;
+  label?: string;
+  type?: "number" | "text" | "password" | "tel";
+  numInputs?: number;
+  disabled?: boolean;
+  animation?: boolean;
+  helperText?: string;
+  onChange: (value: string) => void;
+}
 
 export const InputCode = ({
   value,
@@ -15,7 +30,7 @@ export const InputCode = ({
   helperText,
   onChange,
   ...props
-}) => {
+}: InputCodeProps) => {
   return (
     <Container error={error}>
       {label && (
@@ -32,18 +47,22 @@ export const InputCode = ({
         inputStyle="input-style"
         inputType={type}
         disabled={disabled}
-        allowClear={!disabled}
         {...props}
       />
-      {error && <div className="warning-message">{helperText}</div>}
+      {error && helperText && (
+        <div className="warning-message">{helperText}</div>
+      )}
     </Container>
   );
 };
 
-const Container = styled.div`
+const Container = styled.div<Pick<InputCodeProps, "error">>`
   ${({ error }) => css`
     .label {
       margin-bottom: 1rem;
+      color: ${theme.colors.font1};
+      font-weight: ${theme.font_weight.medium};
+      font-size: ${theme.font_sizes.small};
     }
 
     div {
@@ -59,14 +78,28 @@ const Container = styled.div`
       height: 2.7rem;
       margin: 0 0.3rem;
       font-size: 1.5rem;
-      border-radius: 4px;
-      border: ${`1px solid ${error ? theme.colors.error : "rgba(0, 0, 0, 0.3)"}`};
+      border-radius: ${theme.border_radius.small};
+      background: ${theme.colors.secondary};
+      color: ${theme.colors.font1};
+      border: 1px solid
+        ${error ? theme.colors.error : lighten(0.1, theme.colors.secondary)};
+      text-align: center;
+      font-weight: ${theme.font_weight.large};
+      transition: all 0.2s ease;
+
+      &:focus {
+        outline: none;
+        border-color: ${error ? theme.colors.error : theme.colors.primary};
+        box-shadow: 0 0 0 2px
+          ${error ? theme.colors.error : theme.colors.primary}20;
+      }
 
       &[type="number"]::-webkit-inner-spin-button,
       &[type="number"]::-webkit-outer-spin-button {
         -webkit-appearance: none;
         margin: 0;
       }
+
       ${mediaQuery.minMobile} {
         width: 3rem !important;
         height: 3rem;
@@ -74,11 +107,12 @@ const Container = styled.div`
         font-size: 2rem;
       }
     }
+
     .warning-message {
-      text-align: left;
-      font-size: 0.8em;
+      text-align: center;
+      font-size: 0.85em;
       margin-top: 1em;
-      color: ${({ theme }) => theme.colors.error};
+      color: ${theme.colors.error};
     }
   `}
 `;

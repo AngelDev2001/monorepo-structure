@@ -2,6 +2,7 @@ import AntSelect from "antd/lib/select";
 import { ComponentContainer } from "./component-container";
 import { lighten } from "polished";
 import styled, { css } from "styled-components";
+import { theme } from "../../styles";
 
 type Option = { code?: string; label?: string; value?: string };
 
@@ -98,9 +99,9 @@ export const Select = ({
 };
 
 const StyledSelectMobile = styled.select<
-  Pick<SelectProps, "error" | "placeholder">
+  Pick<SelectProps, "error" | "placeholder" | "value">
 >`
-  ${({ theme, error, value, placeholder }) => css`
+  ${({ error, value, placeholder }) => css`
     width: 100%;
     height: 32px;
     border: none;
@@ -108,27 +109,33 @@ const StyledSelectMobile = styled.select<
     font-size: 1rem;
     background-color: ${error
       ? lighten(0.4, theme.colors.error)
-      : "transparent"};
-    cursor: text;
+      : theme.colors.secondary};
+    cursor: pointer;
     border-radius: ${theme.border_radius.xx_small};
     color: ${placeholder
       ? !value
-        ? theme.colors.white
-        : theme.colors.black
-      : "#444"};
+        ? theme.colors.font2
+        : theme.colors.font1
+      : theme.colors.font1};
     font-weight: ${theme.font_weight.medium};
 
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='#6D8BA1'><polygon points='0,0 100,0 50,50'/></svg>");
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='%23FFC107'><polygon points='0,0 100,0 50,50'/></svg>");
     background-repeat: no-repeat;
     background-size: 10px;
     background-position: right center;
 
+    option {
+      background: ${theme.colors.secondary};
+      color: ${theme.colors.font1};
+    }
+
     &:focus-within {
-      background: ${theme.colors.white};
+      background: ${lighten(0.05, theme.colors.secondary)};
       outline: none;
+      border: 1px solid ${theme.colors.primary};
     }
   `}
 `;

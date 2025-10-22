@@ -1,1 +1,0 @@
-{"version":3,"file":"postAssistance.d.ts","sourceRoot":"","sources":["../../../../src/api/assistances/controllers/postAssistance.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,QAAQ,EAAE,OAAO,EAAE,YAAY,EAAE,MAAM,SAAS,CAAC;AAE1D,eAAO,MAAM,cAAc,GACzB,KAAK,OAAO,EACZ,KAAK,QAAQ,EACb,MAAM,YAAY,KACjB,OAAO,CAAC,IAAI,CAad,CAAC"}

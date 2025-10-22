@@ -4,6 +4,7 @@ import {
   type FontAwesomeIconProps,
 } from "@fortawesome/react-fontawesome";
 import { faCircleNotch } from "@fortawesome/free-solid-svg-icons";
+import { theme } from "../../styles";
 
 interface SpinnerProps {
   height?: string;
@@ -36,9 +37,9 @@ const Container = styled.section<Pick<SpinnerProps, "fullscreen" | "height">>`
   ${({ fullscreen, height }) => css`
     width: 100%;
     height: ${height || (fullscreen ? "100%" : " calc(100% - 90px)")};
-    opacity: 90%;
     display: grid;
     place-items: center;
+
     .item {
       width: auto;
       height: auto;
@@ -49,12 +50,19 @@ const Container = styled.section<Pick<SpinnerProps, "fullscreen" | "height">>`
       align-items: center;
       justify-content: center;
       gap: 1em;
+
+      .message-item {
+        h3 {
+          color: ${theme.colors.font1};
+          font-size: ${theme.font_sizes.large};
+        }
+      }
     }
   `}
 `;
 
 const IconStyled = styled(FontAwesomeIcon)`
-  ${({ theme }) => css`
+  ${() => css`
     color: ${theme.colors.primary};
   `}
 `;

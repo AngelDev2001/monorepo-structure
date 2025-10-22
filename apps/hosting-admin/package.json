@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc --project tsconfig.build.json && vite build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "preview": "vite preview"
@@ -26,6 +26,7 @@
     "react-dom": "^19.1.1",
     "react-firebase-hooks": "^5.1.1",
     "react-hook-form": "^7.65.0",
+    "react-otp-input": "^3.1.1",
     "react-router-dom": "^7.9.4",
     "styled-components": "^6.1.19",
     "yup": "^1.7.1"

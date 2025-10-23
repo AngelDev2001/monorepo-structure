@@ -1,10 +1,12 @@
-import { ConfigsInitializer } from "./providers";
+import { AuthenticationProvider, ConfigsInitializer } from "./providers";
 import { Router } from "./router";
 
 function App() {
   return (
     <ConfigsInitializer>
-      <Router />
+      <AuthenticationProvider>
+        <Router />
+      </AuthenticationProvider>
     </ConfigsInitializer>
   );
 }

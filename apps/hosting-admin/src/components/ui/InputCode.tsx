@@ -78,7 +78,7 @@ const Container = styled.div<Pick<InputCodeProps, "error">>`
       height: 2.7rem;
       margin: 0 0.3rem;
       font-size: 1.5rem;
-      border-radius: ${theme.border_radius.small};
+      border-radius: 4px;
       background: ${theme.colors.secondary};
       color: ${theme.colors.font1};
       border: 1px solid

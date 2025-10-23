@@ -3,7 +3,8 @@ import { isEmpty } from "lodash";
 
 import { auth, fetchCollection, firestore } from "../../../_firebase";
 import { getUserId } from "../../../_firebase/collections";
-import { defaultFirestoreProps } from "../../../utils/defaultFirestoreProps";
+import { User } from "../../../globalTypes";
+import { defaultFirestoreProps } from "../../../utils";
 
 export const postUser = async (
   req: Request,

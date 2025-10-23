@@ -1,25 +1,24 @@
 {
-  "extends": "@servitec-peru/typescript-config/node.json",
   "compilerOptions": {
     "module": "NodeNext",
     "esModuleInterop": true,
+    "moduleResolution": "nodenext",
     "noImplicitReturns": true,
-    "noUnusedLocals": true,
-    "skipLibCheck": true,
     "types": ["node"],
-    "sourceMap": true,
-    "strict": true,
-    "target": "es2017",
+    "noUnusedLocals": true,
     "outDir": "lib",
-    "rootDir": "src",
-    "baseUrl": ".",
+    "sourceMap": true,
+    "target": "es2017",
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noUncheckedIndexedAccess": true,
     "paths": {
       "@servitec-peru/types": ["../../packages/types/src/index.ts"]
     }
   },
   "compileOnSave": true,
-  "include": [
-    "src/**/*"
-  ],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "lib"]
 }

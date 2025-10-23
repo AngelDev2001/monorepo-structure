@@ -1,7 +1,6 @@
-import { firestore, setDocument, updateDocument } from "../index";
-import { fetchCollection, fetchDocument } from "../firestore";
 import { Quotation } from "../../globalTypes.js";
-import { query, where } from "firebase-admin/firestore";
+import { fetchCollection, fetchDocument } from "../firestore";
+import { firestore, setDocument } from "../index";
 
 export const quotationsRef = firestore.collection("quotations");
 
@@ -18,10 +17,9 @@ export const addQuotation = async (
   setDocument<Quotation>(quotationsRef.doc(quotation.id), quotation);
 
 export const fetchQuotations = async (): Promise<Quotation[] | undefined> =>
-  fetchCollection(query(quotationsRef, where("isDeleted", "==", false)));
+  fetchCollection(quotationsRef.where("isDeleted", "==", false));
 
-export const updateQuotation = async (
+export const updateQuotation = (
   quotationId: string,
   quotation: Partial<Quotation>
-): Promise<FirebaseFirestore.WriteResult> =>
-  updateDocument<Partial<Quotation>>(quotationsRef.doc(quotationId), quotation);
+) => quotationsRef.doc(quotationId).update(quotation);

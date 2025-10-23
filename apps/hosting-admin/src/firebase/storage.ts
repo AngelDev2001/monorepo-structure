@@ -1,4 +1,4 @@
-import { storage } from './index';
+import { storage } from "./index";
 
 // export type FirebaseStorage = firebase.storage.Storage;
 // export type FirebaseStorageReference = firebase.storage.Reference;
@@ -13,4 +13,4 @@ export const buckets = {
   default: storage,
 };
 
-export const imageResizes = ['423x304', '313x370'];
+export const imageResizes = ["423x304", "313x370"];

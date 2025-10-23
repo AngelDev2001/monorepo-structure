@@ -1,6 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Button, Col, Form, Input, InputCode, Row } from "../../components";
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  InputCode,
+  notification,
+  Row,
+} from "../../components";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -21,6 +29,25 @@ import { useNavigate } from "react-router-dom";
 
 type VerificationMethod = "email" | "phone";
 
+interface User {
+  id: string;
+  firstName: string;
+  paternalSurname: string;
+  maternalSurname: string;
+  email: string;
+  document: {
+    type: "DNI" | "RUC" | "CE";
+    number: string;
+  };
+  phone: {
+    prefix: string;
+    number: string;
+  };
+  profilePhoto?: string;
+  birthDate?: string;
+  gender?: "male" | "female" | "other";
+}
+
 interface DniForm {
   dni: string;
 }
@@ -31,10 +58,17 @@ interface CodeForm {
 
 export function Login() {
   const navigate = useNavigate();
-  const { findUserByDNI, sendVerificationCode, verifyCode, loginLoading } =
-    useAuthentication();
+  const {
+    findUserByDNI,
+    sendVerificationCode,
+    verifyCode,
+    loginLoading,
+    authUser,
+  } = useAuthentication();
 
-  const [currentStep, setCurrentStep] = useState(2);
+  console.log(authUser);
+
+  const [currentStep, setCurrentStep] = useState(0);
   const [foundUser, setFoundUser] = useState<User | null>(null);
   const [verificationMethod, setVerificationMethod] =
     useState<VerificationMethod>("email");
@@ -51,15 +85,22 @@ export function Login() {
   };
 
   const handleSendCode = async () => {
-    if (foundUser) {
+    if (!foundUser) return;
+    try {
       await sendVerificationCode(foundUser, verificationMethod);
       nextStep();
+    } catch {
+      // el provider ya notifica
     }
   };
 
   const handleVerifyCode = async (code: string) => {
-    await verifyCode(code);
-    navigate("/home");
+    try {
+      await verifyCode(code);
+      navigate("/home");
+    } catch {
+      // el provider ya notifica; aquí no navegamos
+    }
   };
 
   return (
@@ -278,9 +319,8 @@ const StepVerificationMethod = ({
     return `${localPart.substring(0, 3)}***@${domain}`;
   };
 
-  const maskPhone = (phone: string) => {
-    return `+51 *** *** ${phone.slice(-3)}`;
-  };
+  // const maskPhone = (prefix: string, phone: string) =>
+  //   `+${prefix} *** *** ${phone.slice(-3)}`;
 
   return (
     <StepContainer>
@@ -322,7 +362,7 @@ const StepVerificationMethod = ({
             </MethodIconCircle>
             <MethodTitle>Número Celular</MethodTitle>
             <MethodSubtitle>
-              {user?.phone ? maskPhone(user.phone.number) : "+51 *** *** ***"}
+              {user?.phone ? user.phone.number : "+51 *** *** ***"}
             </MethodSubtitle>
             <MethodCheck selected={verificationMethod === "phone"}>
               {verificationMethod === "phone" && (
@@ -385,6 +425,7 @@ type StepVerificationCodeProps = {
   verificationMethod: VerificationMethod;
   onBack: () => void;
   onFinish: (code: string) => Promise<void>;
+  onResend: () => Promise<void>;
   loading: boolean;
 };
 
@@ -394,6 +435,9 @@ const StepVerificationCode = ({
   onFinish,
   loading,
 }: StepVerificationCodeProps) => {
+  const [resendDisabled, setResendDisabled] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+
   const schema = yup.object({
     code: yup
       .string()
@@ -407,6 +451,7 @@ const StepVerificationCode = ({
     formState: { errors },
     setValue,
     watch,
+    reset,
   } = useForm<CodeForm>({
     resolver: yupResolver(schema),
     defaultValues: { code: "" },
@@ -415,13 +460,50 @@ const StepVerificationCode = ({
   const { errorMessage } = useFormUtils({ errors, schema });
   const codeValue = watch("code");
 
+  // ✅ Countdown para reenvío
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    } else {
+      setResendDisabled(false);
+    }
+  }, [countdown]);
+
   const onSubmit = async (formData: CodeForm) => {
-    await onFinish(formData.code);
+    try {
+      await onFinish(formData.code);
+    } catch (error) {
+      // ✅ Limpiar el código si falla
+      reset({ code: "" });
+    }
+  };
+
+  // ✅ Función para reenviar código
+  const handleResendCode = async () => {
+    setResendDisabled(true);
+    setCountdown(60); // 60 segundos de espera
+
+    try {
+      // TODO: Implementar lógica de reenvío
+
+      notification({
+        type: "info",
+        title: "Reenviando código",
+        description: "Por favor espera...",
+      });
+    } catch (error) {
+      setResendDisabled(false);
+      setCountdown(0);
+    }
   };
 
   return (
     <StepContainer>
       <StepHeader>
+        <StepIconWrapper>
+          <FontAwesomeIcon icon={faCheckCircle} />
+        </StepIconWrapper>
         <StepTitle>Código de verificación</StepTitle>
         <StepSubtitle>
           Enviamos un código de 6 dígitos a tu{" "}
@@ -436,17 +518,19 @@ const StepVerificationCode = ({
               name="code"
               control={control}
               render={({ field: { onChange, value } }) => (
-                <InputCode
-                  value={value || ""}
-                  onChange={(code) => {
-                    onChange(code);
-                    setValue("code", code);
-                  }}
-                  numInputs={6}
-                  type="number"
-                  error={!!errors.code}
-                  helperText={errorMessage("code")}
-                />
+                <CodeInputWrapper>
+                  <InputCode
+                    value={value || ""}
+                    onChange={(code) => {
+                      onChange(code);
+                      setValue("code", code);
+                    }}
+                    numInputs={6}
+                    type="number"
+                    error={!!errors.code}
+                    helperText={errorMessage("code")}
+                  />
+                </CodeInputWrapper>
               )}
             />
           </Col>
@@ -458,10 +542,15 @@ const StepVerificationCode = ({
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
-                  console.log("Reenviar código");
+                  if (!resendDisabled) {
+                    handleResendCode();
+                  }
                 }}
+                disabled={resendDisabled}
               >
-                Reenviar código de verificación
+                {resendDisabled
+                  ? `Reenviar en ${countdown}s`
+                  : "Reenviar código de verificación"}
               </ResendLink>
             </ResendSection>
           </Col>
@@ -477,7 +566,7 @@ const StepVerificationCode = ({
           </Col>
 
           <Col xs={24} sm={12}>
-            <Button size="large" block onClick={onBack}>
+            <Button size="large" block onClick={onBack} disabled={loading}>
               <FontAwesomeIcon
                 icon={faArrowLeft}
                 style={{ marginRight: "0.5em" }}
@@ -908,15 +997,18 @@ const ResendText = styled.p`
   margin: 0 0 0.5em;
 `;
 
-const ResendLink = styled.a`
-  color: ${theme.colors.primary};
+const ResendLink = styled.a<{ disabled?: boolean }>`
+  color: ${({ disabled }) =>
+    disabled ? theme.colors.gray : theme.colors.primary};
   text-decoration: none;
   font-weight: ${theme.font_weight.medium};
   font-size: 0.95em;
   transition: opacity 0.2s ease;
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+  pointer-events: ${({ disabled }) => (disabled ? "none" : "auto")};
 
   &:hover {
-    opacity: 0.8;
-    text-decoration: underline;
+    opacity: ${({ disabled }) => (disabled ? 1 : 0.8)};
+    text-decoration: ${({ disabled }) => (disabled ? "none" : "underline")};
   }
 `;

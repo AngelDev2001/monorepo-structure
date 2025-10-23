@@ -24,4 +24,15 @@ export interface User {
   gender: "male" | "female" | "other";
 }
 
-export interface UpdateUser extends Partial<User> {}
+export interface UserRegister {
+  firstName: string;
+  paternalSurname: string;
+  maternalSurname: string;
+  email: string;
+  document: {
+    type: "DNI" | "RUC" | "CE";
+    number: string;
+  };
+  phone: Phone;
+  gender: "male" | "female" | "other";
+}

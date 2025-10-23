@@ -24,7 +24,7 @@ export * from "./InputCode";
 export * from "./notification";
 export * from "./Spinner";
 export * from "./TextArea";
-export * from "./notification";
+export * from "./Select";
 
 export {
   Layout,

@@ -65,6 +65,7 @@ export const AuthenticationProvider = ({
   const [loginLoading, setLoginLoading] = useState(false);
   const [verificationId, setVerificationId] = useState<string | null>(null);
   const [tempUser, setTempUser] = useState<User | null>(null);
+  const [confirmationResult, setConfirmationResult] = useState<any>(null); // ✅ NUEVO
 
   const { firebaseUser, firebaseUserLoading } = useFirebaseUser();
 
@@ -79,7 +80,11 @@ export const AuthenticationProvider = ({
   const authLoading = firebaseUserLoading || userLoading;
   const authError = userError;
 
+  console.log("firebaseUser: ", firebaseUser);
+
   const authUser: User | null = firebaseUser ? (user as User) : null;
+
+  console.log("authUser: ", authUser);
 
   useEffect(() => {
     authError && logout();
@@ -154,75 +159,87 @@ export const AuthenticationProvider = ({
       setLoginLoading(true);
 
       if (method === "phone") {
-        // ========== VERIFICACIÓN POR CELULAR (Firebase Phone Auth) ==========
         console.log("📱 Enviando código por SMS a:", user.phone.number);
 
         const phoneNumber = `+${user.phone.prefix}${user.phone.number}`;
 
-        // Configurar reCAPTCHA (necesario para Firebase Phone Auth)
+        console.log("📞 Número completo:", phoneNumber);
+
+        // ✅ Limpiar verifier anterior si existe
+        if ((window as any).recaptchaVerifier) {
+          try {
+            (window as any).recaptchaVerifier.clear();
+          } catch (e) {
+            console.log("No se pudo limpiar verifier anterior");
+          }
+        }
+
+        // ✅ Configurar reCAPTCHA según documentación
         const appVerifier = new firebase.auth.RecaptchaVerifier(
           "recaptcha-container",
           {
             size: "invisible",
-            callback: () => {
-              console.log("✅ reCAPTCHA resuelto");
+            callback: (response: any) => {
+              console.log("✅ reCAPTCHA resuelto", response);
+            },
+            "expired-callback": () => {
+              console.log("⏱️ reCAPTCHA expiró");
             },
           }
         );
 
-        const confirmationResult = await auth.signInWithPhoneNumber(
+        // Guardar referencia global
+        (window as any).recaptchaVerifier = appVerifier;
+
+        // ✅ Según documentación: signInWithPhoneNumber retorna confirmationResult
+        const result = await auth.signInWithPhoneNumber(
           phoneNumber,
           appVerifier
         );
 
-        setVerificationId(confirmationResult.verificationId);
+        console.log("✅ Confirmation result recibido:", result);
+
+        // ✅ IMPORTANTE: Guardar el confirmationResult completo
+        setConfirmationResult(result);
+        setVerificationId(result.verificationId);
 
         notification({
           type: "success",
           title: "Código enviado",
-          description: `Se envió un código a tu celular ${maskPhone(user.phone.number)}`,
+          description: `Se envió un código SMS a ${user.phone.number}`,
         });
       } else {
-        // ========== VERIFICACIÓN POR EMAIL (Backend API) ==========
-        console.log("📧 Enviando código por email a:", user.email);
-
-        // Aquí llamas a tu backend/Cloud Function para enviar el código por email
-        const response = await fetch("/api/send-verification-code", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId: user.id,
-            email: user.email,
-            method: "email",
-          }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || "Error al enviar código");
-        }
-
-        setVerificationId(data.verificationId); // ID del código generado en backend
-
-        notification({
-          type: "success",
-          title: "Código enviado",
-          description: `Se envió un código a tu email ${maskEmail(user.email)}`,
-        });
+        // Email implementation...
+        console.log("📧 Email no implementado aún");
+        throw new Error("Método de email no disponible");
       }
 
       setLoginLoading(false);
-    } catch (e) {
+    } catch (e: any) {
       const error = isError(e) ? e : undefined;
 
       console.error("❌ Error enviando código:", e);
+      console.error("❌ Error code:", e.code);
+      console.error("❌ Error message:", e.message);
+
+      // ✅ Mensajes de error específicos
+      let errorMessage =
+        error?.message || "No se pudo enviar el código de verificación";
+
+      if (e.code === "auth/operation-not-allowed") {
+        errorMessage =
+          "La autenticación por SMS no está habilitada. Verifica que estés en el plan Blaze de Firebase y que Phone Auth esté configurado correctamente.";
+      } else if (e.code === "auth/invalid-phone-number") {
+        errorMessage =
+          "El número de teléfono no es válido. Formato: +51987654321";
+      } else if (e.code === "auth/too-many-requests") {
+        errorMessage = "Demasiados intentos. Por favor espera unos minutos.";
+      }
 
       notification({
         type: "error",
         title: "Error al enviar código",
-        description:
-          error?.message || "No se pudo enviar el código de verificación",
+        description: errorMessage,
       });
 
       setLoginLoading(false);
@@ -235,8 +252,8 @@ export const AuthenticationProvider = ({
     try {
       setLoginLoading(true);
 
-      if (!verificationId) {
-        throw new Error("No hay código de verificación pendiente");
+      if (!confirmationResult) {
+        throw new Error("No hay confirmación de SMS pendiente");
       }
 
       if (!tempUser) {
@@ -244,36 +261,29 @@ export const AuthenticationProvider = ({
       }
 
       console.log("🔐 Verificando código:", code);
+      console.log("📄 tempUser.id:", tempUser.id);
 
-      // Si fue verificación por teléfono (Firebase Phone Auth)
-      if (verificationId.startsWith("firebase-")) {
-        const credential = firebase.auth.PhoneAuthProvider.credential(
-          verificationId,
-          code
+      // ✅ Confirmar código SMS
+      const result = await confirmationResult.confirm(code);
+
+      console.log("✅ Código verificado");
+      console.log("🔑 result.user.uid:", result.user.uid);
+      console.log("📄 tempUser.id:", tempUser.id);
+
+      // ⚠️ VERIFICAR SI LOS IDs COINCIDEN
+      if (result.user.uid !== tempUser.id) {
+        console.error("❌ ERROR: Los UIDs no coinciden!");
+        console.error("   Auth UID:", result.user.uid);
+        console.error("   Firestore ID:", tempUser.id);
+        throw new Error(
+          "Error de sincronización de IDs. Por favor contacta a soporte."
         );
-        await auth.signInWithCredential(credential);
-      } else {
-        // Si fue verificación por email (Backend API)
-        const response = await fetch("/api/verify-code", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId: tempUser.id,
-            verificationId,
-            code,
-          }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || "Código incorrecto");
-        }
-
-        // Crear custom token y autenticar con Firebase
-        const customToken = data.customToken;
-        await auth.signInWithCustomToken(customToken);
       }
+
+      // ✅ Solo actualizar lastLogin (SIN agregar firebaseUid)
+      await firestore.collection("users").doc(tempUser.id).update({
+        lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+      });
 
       await auth.setPersistence(authPersistence.LOCAL);
 
@@ -285,17 +295,28 @@ export const AuthenticationProvider = ({
 
       // Limpiar estado temporal
       setVerificationId(null);
+      setConfirmationResult(null);
       setTempUser(null);
       setLoginLoading(false);
-    } catch (e) {
+    } catch (e: any) {
       const error = isError(e) ? e : undefined;
 
       console.error("❌ Error verificando código:", e);
+      console.error("❌ Error code:", e.code);
+
+      let errorMessage = error?.message || "El código ingresado no es válido";
+
+      if (e.code === "auth/invalid-verification-code") {
+        errorMessage =
+          "El código ingresado es incorrecto. Por favor verifica e intenta de nuevo.";
+      } else if (e.code === "auth/code-expired") {
+        errorMessage = "El código ha expirado. Por favor solicita uno nuevo.";
+      }
 
       notification({
         type: "error",
         title: "Código incorrecto",
-        description: error?.message || "El código ingresado no es válido",
+        description: errorMessage,
       });
 
       setLoginLoading(false);
@@ -307,11 +328,24 @@ export const AuthenticationProvider = ({
     sessionStorage.clear();
     localStorage.clear();
     setVerificationId(null);
+    setConfirmationResult(null);
     setTempUser(null);
+
+    // Limpiar reCAPTCHA
+    if ((window as any).recaptchaVerifier) {
+      try {
+        (window as any).recaptchaVerifier.clear();
+        (window as any).recaptchaVerifier = null;
+      } catch (e) {
+        console.log("No se pudo limpiar verifier en logout");
+      }
+    }
+
     return auth.signOut();
   };
 
-  if (authLoading && location.pathname !== "/") return <Spinner fullscreen />;
+  if (authLoading && location.pathname !== "/")
+    return <Spinner height="80vh" />;
 
   return (
     <AuthenticationContext.Provider
@@ -356,12 +390,11 @@ const isAuthUser = (data: unknown): data is User =>
 const isAuthUserError = (data: unknown) =>
   isObject(data) && "type" in data && data.type === "error";
 
-// Helpers para enmascarar datos sensibles
-const maskEmail = (email: string) => {
-  const [user, domain] = email.split("@");
-  return `${user.substring(0, 3)}***@${domain}`;
-};
+// const maskEmail = (email: string) => {
+//   const [user, domain] = email.split("@");
+//   return `${user.substring(0, 3)}***@${domain}`;
+// };
 
-const maskPhone = (phone: string) => {
-  return `*** *** ${phone.slice(-3)}`;
-};
+// const maskPhone = (phone: string) => {
+//   return `*** *** ${phone?.slice(-3)}`;
+// };

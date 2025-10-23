@@ -1,6 +1,6 @@
-import firebase from 'firebase/compat/app';
+import firebase from "firebase/compat/app";
 
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 type Document<T extends ObjectType> = { id: string } & T;
 
@@ -44,7 +44,8 @@ export const fetchCollection = async <T extends ObjectType>(
   let newQuery = query;
 
   whereClauses?.forEach(
-    ([field, operation, value]) => (newQuery = newQuery.where(field, operation, value))
+    ([field, operation, value]) =>
+      (newQuery = newQuery.where(field, operation, value))
   );
 
   const querySnapshot = await newQuery.get();
@@ -83,8 +84,9 @@ export const mergeDocument = async <T extends ObjectType>(
   document: T
 ): Promise<WriteResult> => docRef.set(document, { merge: true });
 
-export const deleteDocument = async (docRef: DocumentReference): Promise<WriteResult> =>
-  docRef.delete();
+export const deleteDocument = async (
+  docRef: DocumentReference
+): Promise<WriteResult> => docRef.delete();
 
 export const uploadToFirebase = async (file: File): Promise<string> => {
   const storage = getStorage();

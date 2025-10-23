@@ -40,7 +40,7 @@ interface Phone {
   number: string;
 }
 
-interface User {
+interface User extends DefaultFirestoreProps {
   id: string;
   firstName: string;
   paternalSurname: string;

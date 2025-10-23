@@ -6,7 +6,6 @@
     "esModuleInterop": true,
     "incremental": false,
     "isolatedModules": true,
-    "moduleResolution": "bundler",
     "lib": ["ES2022"],
     "moduleDetection": "force",
     "noUncheckedIndexedAccess": true,

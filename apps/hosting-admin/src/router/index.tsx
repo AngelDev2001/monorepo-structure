@@ -58,7 +58,7 @@ export function Router() {
       </Route>
 
       {/* ========== RUTA 404 ========== */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

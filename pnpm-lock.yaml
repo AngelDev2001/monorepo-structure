@@ -202,6 +202,9 @@ importers:
       styled-components:
         specifier: ^6.1.19
         version: 6.1.19(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      use-http:
+        specifier: ^1.0.28
+        version: 1.0.28(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       yup:
         specifier: ^1.7.1
         version: 1.7.1
@@ -4959,8 +4962,30 @@ packages:
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
 
+  urs@0.0.8:
+    resolution: {integrity: sha512-LaSSPpr91XrVA3vW2zPupw4K6DSQEDKdL4yQZX1mO2fpljIMpB5zctrjRvxLurelWSgKsHsCmfHNCImscryirQ==}
+    peerDependencies:
+      react: ^16.13.1 || ^17.0.0
+      react-dom: ^16.13.1 || ^17.0.0
+
+  use-http@1.0.28:
+    resolution: {integrity: sha512-MWux13mGDBj+bzuTZJczDIjFu5r7D9eYrrKyKaCo+KFvoGRE9mpNHLK21pAJb2Sbdh/J85y5E4b2xR+IH2WOkg==}
+    peerDependencies:
+      react: ^16.13.1 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.13.1 || ^17.0.0 || ^18.0.0
+
+  use-ssr@1.0.25:
+    resolution: {integrity: sha512-VYF8kJKI+X7+U4XgGoUER2BUl0vIr+8OhlIhyldgSGE0KHMoDRXPvWeHUUeUktq7ACEOVLzXGq1+QRxcvtwvyQ==}
+    peerDependencies:
+      react: ^16.13.1 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.13.1 || ^17.0.0 || ^18.0.0
+
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
+
+  utility-types@3.11.0:
+    resolution: {integrity: sha512-6Z7Ma2aVEWisaL6TvBCy7P8rm2LQoPv6dJ7ecIaIixHcwfbJ0x7mWdbcwlIM5IGQxPZSFYeqRCqlOOeKoJYMkw==}
+    engines: {node: '>= 4'}
 
   utils-merge@1.0.1:
     resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
@@ -10819,8 +10844,28 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
+  urs@0.0.8(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
+    dependencies:
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
+
+  use-http@1.0.28(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
+    dependencies:
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
+      urs: 0.0.8(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      use-ssr: 1.0.25(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      utility-types: 3.11.0
+
+  use-ssr@1.0.25(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
+    dependencies:
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
+
   util-deprecate@1.0.2:
     optional: true
+
+  utility-types@3.11.0: {}
 
   utils-merge@1.0.1: {}
 

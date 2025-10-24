@@ -4,16 +4,11 @@
     "esModuleInterop": true,
     "moduleResolution": "nodenext",
     "noImplicitReturns": true,
-    "types": ["node"],
     "noUnusedLocals": true,
     "outDir": "lib",
     "sourceMap": true,
-    "target": "es2017",
     "strict": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noUncheckedIndexedAccess": true,
+    "target": "es2017",
     "paths": {
       "@servitec-peru/types": ["../../packages/types/src/index.ts"]
     }

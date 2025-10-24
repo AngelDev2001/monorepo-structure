@@ -2,7 +2,7 @@ import InputAntd from "antd/lib/input";
 import type { InputProps as AntInputProps } from "antd";
 import { ComponentContainer } from "./component-container";
 
-interface InputPropsa extends Omit<AntInputProps, "variant" | "size"> {
+interface InputPropsa extends Omit<AntInputProps, "variant"> {
   required?: boolean;
   hidden?: boolean;
   error?: boolean;

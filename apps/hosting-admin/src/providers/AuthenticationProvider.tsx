@@ -34,8 +34,15 @@ export interface User {
 interface ContextType {
   authUser: User | null;
   findUserByDNI: (dni: string) => Promise<User | null>;
+  tempUser: User | null;
   sendVerificationCode: (
-    user: User,
+    user: {
+      email?: string;
+      phone?: {
+        prefix?: string;
+        number?: string;
+      };
+    },
     method: VerificationMethod
   ) => Promise<void>;
   verifyCode: (code: string) => Promise<void>;
@@ -47,6 +54,7 @@ interface ContextType {
 const AuthenticationContext = createContext<ContextType>({
   authUser: null,
   findUserByDNI: () => Promise.reject("Unable to find AuthenticationProvider."),
+  tempUser: null,
   sendVerificationCode: () =>
     Promise.reject("Unable to find AuthenticationProvider."),
   verifyCode: () => Promise.reject("Unable to find AuthenticationProvider."),
@@ -67,10 +75,11 @@ export const AuthenticationProvider = ({
   const [tempUser, setTempUser] = useState<User | null>(null);
   const [confirmationResult, setConfirmationResult] = useState<any>(null); // ✅ NUEVO
 
-  const { firebaseUser, firebaseUserLoading } = useFirebaseUser();
+  const { firebaseUser, firebaseUserLoading, firestoreDocId } =
+    useFirebaseUser();
 
-  const userDocRef = firebaseUser
-    ? firestore.collection("users").doc(firebaseUser.uid)
+  const userDocRef = firestoreDocId
+    ? firestore.collection("users").doc(firestoreDocId)
     : undefined;
 
   const [user, userLoading, userError] = useDocumentData<User>(
@@ -97,7 +106,6 @@ export const AuthenticationProvider = ({
     }
   }, [authUser && (authUser as any).type]);
 
-  // ========== STEP 1: Buscar usuario por DNI ==========
   const findUserByDNI = async (dni: string): Promise<User | null> => {
     try {
       setLoginLoading(true);
@@ -130,21 +138,19 @@ export const AuthenticationProvider = ({
 
       console.log("✅ Usuario encontrado:", foundUser);
 
+      // ✅ Guardar en estado (NO en localStorage)
       setTempUser(foundUser);
       setLoginLoading(false);
 
       return foundUser;
     } catch (e) {
       const error = isError(e) ? e : undefined;
-
       console.error("❌ Error buscando usuario:", e);
-
       notification({
         type: "error",
         title: "Error",
         description: error?.message || "Error al buscar usuario",
       });
-
       setLoginLoading(false);
       return null;
     }
@@ -152,29 +158,52 @@ export const AuthenticationProvider = ({
 
   // ========== STEP 2: Enviar código de verificación ==========
   const sendVerificationCode = async (
-    user: User,
+    user: {
+      email?: string;
+      phone?: {
+        prefix?: string;
+        number?: string;
+      };
+    },
     method: VerificationMethod
   ) => {
     try {
       setLoginLoading(true);
 
       if (method === "phone") {
-        console.log("📱 Enviando código por SMS a:", user.phone.number);
+        console.log("📱 Enviando código por SMS a:", user?.phone.number);
 
-        const phoneNumber = `+${user.phone.prefix}${user.phone.number}`;
+        const phoneNumber = `${user?.phone.prefix}${user?.phone.number}`;
 
-        console.log("📞 Número completo:", phoneNumber);
-
-        // ✅ Limpiar verifier anterior si existe
+        // Limpiar verifier anterior
+        console.log("🧹 Limpiando verifier anterior...");
         if ((window as any).recaptchaVerifier) {
           try {
-            (window as any).recaptchaVerifier.clear();
+            await (window as any).recaptchaVerifier.clear();
+            (window as any).recaptchaVerifier = null;
           } catch (e) {
             console.log("No se pudo limpiar verifier anterior");
           }
         }
 
-        // ✅ Configurar reCAPTCHA según documentación
+        // Eliminar y recrear el elemento
+        console.log("🗑️ Eliminando contenedor antiguo...");
+        const oldContainer = document.getElementById("recaptcha-container");
+        if (oldContainer) {
+          oldContainer.remove();
+        }
+
+        console.log("🆕 Creando nuevo contenedor...");
+        const newContainer = document.createElement("div");
+        newContainer.id = "recaptcha-container";
+        document.body.appendChild(newContainer);
+
+        // Esperar
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        console.log("🔧 Creando nuevo RecaptchaVerifier...");
+
+        // Crear verifier
         const appVerifier = new firebase.auth.RecaptchaVerifier(
           "recaptcha-container",
           {
@@ -185,21 +214,32 @@ export const AuthenticationProvider = ({
             "expired-callback": () => {
               console.log("⏱️ reCAPTCHA expiró");
             },
-          }
+          },
+          firebase.app()
         );
 
-        // Guardar referencia global
+        console.log("⏳ Renderizando verifier...");
+        await appVerifier.render();
+        console.log("✅ Verifier renderizado");
+
+        // ❌ NO verificar widgetId, simplemente continuar
+        // Guardar referencia
         (window as any).recaptchaVerifier = appVerifier;
 
-        // ✅ Según documentación: signInWithPhoneNumber retorna confirmationResult
+        // Esperar más tiempo antes de enviar
+        console.log("⏰ Esperando para estabilizar...");
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+
+        console.log("📤 Enviando código de verificación...");
+
+        // ✅ Intentar enviar directamente
         const result = await auth.signInWithPhoneNumber(
           phoneNumber,
           appVerifier
         );
 
-        console.log("✅ Confirmation result recibido:", result);
+        console.log("✅ Código enviado! Confirmation result:", result);
 
-        // ✅ IMPORTANTE: Guardar el confirmationResult completo
         setConfirmationResult(result);
         setVerificationId(result.verificationId);
 
@@ -209,31 +249,34 @@ export const AuthenticationProvider = ({
           description: `Se envió un código SMS a ${user.phone.number}`,
         });
       } else {
-        // Email implementation...
-        console.log("📧 Email no implementado aún");
         throw new Error("Método de email no disponible");
       }
 
       setLoginLoading(false);
     } catch (e: any) {
-      const error = isError(e) ? e : undefined;
-
       console.error("❌ Error enviando código:", e);
       console.error("❌ Error code:", e.code);
       console.error("❌ Error message:", e.message);
 
-      // ✅ Mensajes de error específicos
-      let errorMessage =
-        error?.message || "No se pudo enviar el código de verificación";
+      // Limpiar
+      if ((window as any).recaptchaVerifier) {
+        try {
+          await (window as any).recaptchaVerifier.clear();
+          (window as any).recaptchaVerifier = null;
+        } catch (cleanupError) {
+          console.log("Error limpiando:", cleanupError);
+        }
+      }
 
-      if (e.code === "auth/operation-not-allowed") {
+      let errorMessage = "No se pudo enviar el código";
+
+      if (e.code === "auth/invalid-app-credential") {
         errorMessage =
-          "La autenticación por SMS no está habilitada. Verifica que estés en el plan Blaze de Firebase y que Phone Auth esté configurado correctamente.";
-      } else if (e.code === "auth/invalid-phone-number") {
-        errorMessage =
-          "El número de teléfono no es válido. Formato: +51987654321";
+          "Error de verificación. Recarga la página e intenta de nuevo.";
       } else if (e.code === "auth/too-many-requests") {
-        errorMessage = "Demasiados intentos. Por favor espera unos minutos.";
+        errorMessage = "Demasiados intentos. Espera 15 minutos.";
+      } else if (e.code === "auth/invalid-phone-number") {
+        errorMessage = "Número inválido. Formato: +51987654321";
       }
 
       notification({
@@ -257,33 +300,27 @@ export const AuthenticationProvider = ({
       }
 
       if (!tempUser) {
-        throw new Error("No hay usuario temporal");
+        throw new Error("No hay usuario temporal guardado");
       }
 
       console.log("🔐 Verificando código:", code);
-      console.log("📄 tempUser.id:", tempUser.id);
+      console.log("👤 Usuario a vincular:", tempUser);
 
       // ✅ Confirmar código SMS
       const result = await confirmationResult.confirm(code);
 
       console.log("✅ Código verificado");
-      console.log("🔑 result.user.uid:", result.user.uid);
-      console.log("📄 tempUser.id:", tempUser.id);
+      console.log("🔑 Firebase Auth UID:", result.user.uid);
+      console.log("📝 Documento Firestore ID:", tempUser.id);
 
-      // ⚠️ VERIFICAR SI LOS IDs COINCIDEN
-      if (result.user.uid !== tempUser.id) {
-        console.error("❌ ERROR: Los UIDs no coinciden!");
-        console.error("   Auth UID:", result.user.uid);
-        console.error("   Firestore ID:", tempUser.id);
-        throw new Error(
-          "Error de sincronización de IDs. Por favor contacta a soporte."
-        );
-      }
-
-      // ✅ Solo actualizar lastLogin (SIN agregar firebaseUid)
+      // ✅✅ VINCULAR: Actualizar el documento EXISTENTE con el UID de Firebase
       await firestore.collection("users").doc(tempUser.id).update({
+        firebaseAuthUid: result.user.uid, // ✅ Guardar el UID como campo
         lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+        phoneVerified: true,
       });
+
+      console.log("✅ Usuario vinculado correctamente");
 
       await auth.setPersistence(authPersistence.LOCAL);
 
@@ -293,18 +330,14 @@ export const AuthenticationProvider = ({
         description: `Hola ${tempUser.firstName}!`,
       });
 
-      // Limpiar estado temporal
       setVerificationId(null);
       setConfirmationResult(null);
       setTempUser(null);
       setLoginLoading(false);
     } catch (e: any) {
-      const error = isError(e) ? e : undefined;
-
       console.error("❌ Error verificando código:", e);
-      console.error("❌ Error code:", e.code);
 
-      let errorMessage = error?.message || "El código ingresado no es válido";
+      let errorMessage = "El código ingresado no es válido";
 
       if (e.code === "auth/invalid-verification-code") {
         errorMessage =
@@ -345,13 +378,14 @@ export const AuthenticationProvider = ({
   };
 
   if (authLoading && location.pathname !== "/")
-    return <Spinner height="80vh" />;
+    <Spinner fullscreen height="80vh" />;
 
   return (
     <AuthenticationContext.Provider
       value={{
         authUser: isAuthUser(authUser) ? authUser : null,
         findUserByDNI,
+        tempUser,
         sendVerificationCode,
         verifyCode,
         logout,
@@ -359,7 +393,6 @@ export const AuthenticationProvider = ({
         verificationId,
       }}
     >
-      {/* reCAPTCHA container (invisible) */}
       <div id="recaptcha-container" />
       {children}
     </AuthenticationContext.Provider>
@@ -369,19 +402,40 @@ export const AuthenticationProvider = ({
 const useFirebaseUser = () => {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [firebaseUserLoading, setFirebaseUserLoading] = useState(true);
+  const [firestoreDocId, setFirestoreDocId] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       setFirebaseUser(user);
+
+      if (user) {
+        // ✅ Buscar el documento por firebaseAuthUid
+        try {
+          const userSnapshot = await firestore
+            .collection("users")
+            .where("firebaseAuthUid", "==", user.uid)
+            .limit(1)
+            .get();
+
+          if (!userSnapshot.empty) {
+            setFirestoreDocId(userSnapshot.docs[0].id);
+          } else {
+            console.error("❌ No se encontró documento para UID:", user.uid);
+          }
+        } catch (error) {
+          console.error("❌ Error buscando usuario:", error);
+        }
+      } else {
+        setFirestoreDocId(null);
+      }
+
       setFirebaseUserLoading(false);
     });
 
-    return () => {
-      unsubscribe();
-    };
+    return () => unsubscribe();
   }, []);
 
-  return { firebaseUser, firebaseUserLoading };
+  return { firebaseUser, firebaseUserLoading, firestoreDocId };
 };
 
 const isAuthUser = (data: unknown): data is User =>

@@ -1,4 +1,5 @@
 import { Response, Request, NextFunction } from "express";
+
 import { fetchQuotations } from "../../../_firebase/collections";
 
 export const getQuotations = async (

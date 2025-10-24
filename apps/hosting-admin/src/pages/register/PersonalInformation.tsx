@@ -72,7 +72,7 @@ export const PersonalInformation = ({
       paternalSurname: "",
       maternalSurname: "",
       email: "",
-      phonePrefix: "51",
+      phonePrefix: "+51",
       phoneNumber: "",
       gender: undefined,
     },
@@ -106,7 +106,6 @@ export const PersonalInformation = ({
               render={({ field: { onChange, value, name } }) => (
                 <Input
                   label="Nombres"
-                  placeholder="Ej: Juan Carlos"
                   value={value}
                   onChange={onChange}
                   name={name}
@@ -126,7 +125,6 @@ export const PersonalInformation = ({
               render={({ field: { onChange, value, name } }) => (
                 <Input
                   label="Apellido Paterno"
-                  placeholder="Ej: García"
                   value={value}
                   onChange={onChange}
                   name={name}
@@ -146,7 +144,6 @@ export const PersonalInformation = ({
               render={({ field: { onChange, value, name } }) => (
                 <Input
                   label="Apellido Materno"
-                  placeholder="Ej: López"
                   value={value}
                   onChange={onChange}
                   name={name}
@@ -166,7 +163,6 @@ export const PersonalInformation = ({
               render={({ field: { onChange, value, name } }) => (
                 <Input
                   label="Correo Electrónico"
-                  placeholder="ejemplo@correo.com"
                   value={value}
                   onChange={onChange}
                   name={name}
@@ -187,7 +183,7 @@ export const PersonalInformation = ({
               render={({ field: { onChange, value, name } }) => (
                 <Input
                   label="Código"
-                  value={`+${value}`}
+                  value={`${value}`}
                   onChange={(e) => {
                     const cleaned = e.target.value.replace(/\D/g, "");
                     onChange(cleaned);
@@ -210,7 +206,6 @@ export const PersonalInformation = ({
               render={({ field: { onChange, value, name } }) => (
                 <Input
                   label="Número de Celular"
-                  placeholder="987654321"
                   value={value}
                   onChange={(e) => {
                     const cleaned = e.target.value.replace(/\D/g, "");

@@ -1,9 +1,13 @@
 import { Layout } from "../ui";
 import styled from "styled-components";
-import { Space } from "antd";
+import { Button, Space } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowRightFromBracket,
+  faBars,
+} from "@fortawesome/free-solid-svg-icons";
 import { mediaQuery, theme } from "../../styles";
+import { useAuthentication } from "../../providers";
 
 const { Header } = Layout;
 
@@ -16,6 +20,8 @@ export const HeaderLayout = ({
   isVisibleDrawer,
   onSetIsVisibleDrawer,
 }: HeaderLayoutProps) => {
+  const { logout } = useAuthentication();
+
   return (
     <HeaderContainer>
       <div className="left-item">
@@ -28,6 +34,12 @@ export const HeaderLayout = ({
           </div>
         </Space>
       </div>
+      <div></div>
+      <div>
+        <Button danger type="primary" onClick={() => logout()}>
+          <FontAwesomeIcon icon={faArrowRightFromBracket} />
+        </Button>
+      </div>
     </HeaderContainer>
   );
 };
@@ -37,8 +49,8 @@ const HeaderContainer = styled(Header)`
   position: sticky;
   top: 1px;
   z-index: 1000;
-  display: grid;
-  grid-template-columns: auto 1fr;
+  display: flex;
+  justify-content: space-between;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   overflow: hidden;
@@ -49,6 +61,9 @@ const HeaderContainer = styled(Header)`
     align-items: center;
 
     .items-wrapper {
+      display: flex;
+      justify-content: space-between;
+
       .icon-item {
         cursor: pointer;
         color: ${theme.colors.font1};

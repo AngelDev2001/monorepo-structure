@@ -16,7 +16,7 @@ interface UserRegister1 {
   documentNumber: string;
 }
 
-export const AccessData = ({ onNext }: AccessDataProps) => {
+export const AccessData = ({ onNext }: { onNext: (user: any) => void }) => {
   const [documentType, setDocumentType] = useState<DocumentType>("dni");
 
   const getDocumentValidation = (type: DocumentType) => {
@@ -68,8 +68,7 @@ export const AccessData = ({ onNext }: AccessDataProps) => {
   }
 
   const onSubmit = (formData: UserRegister1) => {
-    localStorage.setItem("user", formData);
-    onNext();
+    onNext(formData);
   };
 
   const documentOptions = [

@@ -36,6 +36,10 @@ export const fetchUsers = async (
 export const fetchUser = async (userId: string): Promise<User | undefined> =>
   fetchDocument<User>(usersRef.doc(userId));
 
+export const fetchUserByDni = async (
+  whereClauses?: WhereClauses<Partial<User>>[]
+): Promise<User[]> => fetchCollection<User>(usersRef, whereClauses);
+
 export const addUser = async (user: User): Promise<void> =>
   setDocument<User>(usersRef.doc(user.id), user);
 

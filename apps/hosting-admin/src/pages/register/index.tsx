@@ -37,22 +37,6 @@ export function Register() {
   const nextStep = () => setCurrentStep((prev) => prev + 1);
   const prevStep = () => setCurrentStep((prev) => prev - 1);
 
-  const mapUser = (): User => ({
-    firstName: "",
-    paternalSurname: "",
-    maternalSurname: "",
-    email: "",
-    document: {
-      type: "",
-      number: "",
-    },
-    phone: {
-      prefix: "",
-      number: "",
-    },
-    gender: "",
-  });
-
   const onSubmitAccessData = (user) => {
     setStep1Data(user);
     nextStep();
@@ -77,7 +61,7 @@ export function Register() {
           number: fullData.documentNumber,
         },
         phone: {
-          prefix: fullData.phonePrefix,
+          prefix: "+51",
           number: fullData.phoneNumber,
         },
         gender: fullData.gender,

@@ -45,21 +45,21 @@ export const DrawerLayout = ({
       icon: <FontAwesomeIcon icon={faHome} size="lg" />,
       onClick: () => onClickHome(),
     },
-    {
-      label: "Control de Accesos (acls)",
-      key: "group-acls",
-      icon: <FontAwesomeIcon icon={faUsersCog} size="lg" />,
-      children: [
-        {
-          label: "Roles con Acls",
-          key: "default-roles-acls",
-        },
-        {
-          label: "Administrador Acls",
-          key: "manage-acls",
-        },
-      ],
-    },
+    // {
+    //   label: "Control de Accesos (acls)",
+    //   key: "group-acls",
+    //   icon: <FontAwesomeIcon icon={faUsersCog} size="lg" />,
+    //   children: [
+    //     {
+    //       label: "Roles con Acls",
+    //       key: "default-roles-acls",
+    //     },
+    //     {
+    //       label: "Administrador Acls",
+    //       key: "manage-acls",
+    //     },
+    //   ],
+    // },
     {
       label: "Administración",
       key: "manager",
@@ -110,56 +110,56 @@ export const DrawerLayout = ({
         },
       ],
     },
-    {
-      label: "Sorteos",
-      key: "raffles-group",
-      icon: <FontAwesomeIcon icon={faTicket} size="lg" />,
-      children: [
-        {
-          label: "Crear Sorteo",
-          key: "raffle-new",
-          icon: <FontAwesomeIcon icon={faSquarePlus} size="lg" />,
-          onClick: () => onClickMenu("/raffles/new"),
-        },
-        {
-          label: "Lista de Sorteos",
-          key: "raffles-list",
-          icon: <FontAwesomeIcon icon={faList} size="lg" />,
-          onClick: () => onClickMenu("/raffles"), // ✅ Corregí la ruta (estaba duplicada /raffles/new)
-        },
-      ],
-    },
-    {
-      label: "Tutoriales",
-      key: "tutorials-group",
-      icon: <FontAwesomeIcon icon={faShapes} size="lg" />,
-      children: [
-        {
-          label: "Crear Tutorial",
-          key: "tutorial-new",
-          icon: <FontAwesomeIcon icon={faSquarePlus} size="lg" />,
-          onClick: () => onClickMenu("/tutorials/new"),
-        },
-        {
-          label: "Lista de Tutoriales",
-          key: "tutorials-list",
-          icon: <FontAwesomeIcon icon={faList} size="lg" />,
-          onClick: () => onClickMenu("/tutorials"),
-        },
-      ],
-    },
-    {
-      label: "Encuestas",
-      key: "surveys-group",
-      icon: <FontAwesomeIcon icon={faPoll} size="lg" />,
-      children: [
-        {
-          label: "Estudio del Clima Organizacional",
-          key: "organizational-climate-studies",
-          icon: <FontAwesomeIcon icon={faFileAlt} size="lg" />,
-        },
-      ],
-    },
+    // {
+    //   label: "Sorteos",
+    //   key: "raffles-group",
+    //   icon: <FontAwesomeIcon icon={faTicket} size="lg" />,
+    //   children: [
+    //     {
+    //       label: "Crear Sorteo",
+    //       key: "raffle-new",
+    //       icon: <FontAwesomeIcon icon={faSquarePlus} size="lg" />,
+    //       onClick: () => onClickMenu("/raffles/new"),
+    //     },
+    //     {
+    //       label: "Lista de Sorteos",
+    //       key: "raffles-list",
+    //       icon: <FontAwesomeIcon icon={faList} size="lg" />,
+    //       onClick: () => onClickMenu("/raffles"), // ✅ Corregí la ruta (estaba duplicada /raffles/new)
+    //     },
+    //   ],
+    // },
+    // {
+    //   label: "Tutoriales",
+    //   key: "tutorials-group",
+    //   icon: <FontAwesomeIcon icon={faShapes} size="lg" />,
+    //   children: [
+    //     {
+    //       label: "Crear Tutorial",
+    //       key: "tutorial-new",
+    //       icon: <FontAwesomeIcon icon={faSquarePlus} size="lg" />,
+    //       onClick: () => onClickMenu("/tutorials/new"),
+    //     },
+    //     {
+    //       label: "Lista de Tutoriales",
+    //       key: "tutorials-list",
+    //       icon: <FontAwesomeIcon icon={faList} size="lg" />,
+    //       onClick: () => onClickMenu("/tutorials"),
+    //     },
+    //   ],
+    // },
+    // {
+    //   label: "Encuestas",
+    //   key: "surveys-group",
+    //   icon: <FontAwesomeIcon icon={faPoll} size="lg" />,
+    //   children: [
+    //     {
+    //       label: "Estudio del Clima Organizacional",
+    //       key: "organizational-climate-studies",
+    //       icon: <FontAwesomeIcon icon={faFileAlt} size="lg" />,
+    //     },
+    //   ],
+    // },
   ];
 
   return (
@@ -167,7 +167,7 @@ export const DrawerLayout = ({
       key="right"
       title={
         <HeaderTitle>
-          <h3>Mi Sistema</h3>
+          <h3>Servitec Work</h3>
           <VersionBadge>v1.0.0</VersionBadge>
         </HeaderTitle>
       }

@@ -1,111 +1,29 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
-import {
-  Button,
-  Col,
-  Form,
-  Input,
-  InputCode,
-  notification,
-  Row,
-} from "../../components";
-import { Controller, useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faArrowLeft,
-  faArrowRight,
-  faCheckCircle,
-  faEnvelope,
-  faMobileAlt,
-  faShieldHalved,
-  faSpinner,
-} from "@fortawesome/free-solid-svg-icons";
+import { faShieldHalved } from "@fortawesome/free-solid-svg-icons";
 import { theme } from "../../styles";
-import { useFormUtils } from "../../hooks/useFormUtils";
 import { useAuthentication } from "../../providers";
-import { useNavigate } from "react-router-dom";
-
-type VerificationMethod = "email" | "phone";
-
-interface User {
-  id: string;
-  firstName: string;
-  paternalSurname: string;
-  maternalSurname: string;
-  email: string;
-  document: {
-    type: "DNI" | "RUC" | "CE";
-    number: string;
-  };
-  phone: {
-    prefix: string;
-    number: string;
-  };
-  profilePhoto?: string;
-  birthDate?: string;
-  gender?: "male" | "female" | "other";
-}
-
-interface DniForm {
-  dni: string;
-}
-
-interface CodeForm {
-  code: string;
-}
+import { Link, useNavigate } from "react-router-dom";
+import { VerificationCode } from "./VerificationCode.tsx";
+import { AccessDataLogin } from "./AccessDataLogin.tsx";
+import { VerificationMethod } from "./VerificationMethod.tsx";
 
 export function Login() {
   const navigate = useNavigate();
-  const {
-    findUserByDNI,
-    sendVerificationCode,
-    verifyCode,
-    loginLoading,
-    authUser,
-  } = useAuthentication();
-
-  console.log(authUser);
+  const { verifyCode, loginLoading } = useAuthentication();
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [foundUser, setFoundUser] = useState<User | null>(null);
-  const [verificationMethod, setVerificationMethod] =
-    useState<VerificationMethod>("email");
-
-  const nextStep = () => setCurrentStep((prev) => prev + 1);
+  const onNext = () => setCurrentStep((prev) => prev + 1);
   const prevStep = () => setCurrentStep((prev) => prev - 1);
 
-  const handleDniSubmit = async (dni: string) => {
-    const user = await findUserByDNI(dni);
-    if (user) {
-      setFoundUser(user);
-      nextStep();
-    }
-  };
-
-  const handleSendCode = async () => {
-    if (!foundUser) return;
-    try {
-      await sendVerificationCode(foundUser, verificationMethod);
-      nextStep();
-    } catch {
-      // el provider ya notifica
-    }
-  };
-
   const handleVerifyCode = async (code: string) => {
-    try {
-      await verifyCode(code);
-      navigate("/home");
-    } catch {
-      // el provider ya notifica; aquí no navegamos
-    }
+    await verifyCode(code);
+    navigate("/home");
   };
 
   return (
     <LoginContainer>
-      {/* ========== LADO IZQUIERDO: IMAGEN ========== */}
       <LeftSide>
         <ImageOverlay />
         <ContentOverlay>
@@ -153,7 +71,6 @@ export function Login() {
         </ContentOverlay>
       </LeftSide>
 
-      {/* ========== LADO DERECHO: FORMULARIO ========== */}
       <RightSide>
         <FormContainer>
           <WelcomeHeader>
@@ -165,446 +82,24 @@ export function Login() {
 
           <StepsContent>
             {currentStep === 0 && (
-              <StepDni onNext={handleDniSubmit} loading={loginLoading} />
+              <AccessDataLogin onNext={onNext} loading={loginLoading} />
             )}
             {currentStep === 1 && (
-              <StepVerificationMethod
-                verificationMethod={verificationMethod}
-                setVerificationMethod={setVerificationMethod}
-                onNext={handleSendCode}
-                onBack={prevStep}
-                loading={loginLoading}
-                user={foundUser}
-              />
+              <VerificationMethod onNext={onNext} onBack={prevStep} />
             )}
             {currentStep === 2 && (
-              <StepVerificationCode
-                verificationMethod={verificationMethod}
-                onBack={prevStep}
-                onFinish={handleVerifyCode}
-                loading={loginLoading}
-              />
+              <VerificationCode onBack={prevStep} onFinish={handleVerifyCode} />
             )}
           </StepsContent>
+
+          <LoginLink>
+            ¿Aún no tienes cuenta? <Link to="/register">Registrarme</Link>
+          </LoginLink>
         </FormContainer>
       </RightSide>
     </LoginContainer>
   );
 }
-
-// ============ STEP 1: DNI ============
-type StepDniProps = {
-  onNext: (dni: string) => Promise<void>;
-  loading: boolean;
-};
-
-const StepDni = ({ onNext, loading }: StepDniProps) => {
-  const schema = yup.object({
-    dni: yup
-      .string()
-      .required("El DNI es obligatorio")
-      .matches(/^\d{8}$/, "El DNI debe tener exactamente 8 dígitos"),
-  });
-
-  const {
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm<DniForm>({
-    resolver: yupResolver(schema),
-    defaultValues: { dni: "" },
-  });
-
-  const { required, error, errorMessage } = useFormUtils({ errors, schema });
-
-  const onSubmit = async (formData: DniForm) => {
-    await onNext(formData.dni);
-  };
-
-  return (
-    <StepContainer>
-      <StepHeader>
-        <StepTitle>Verificación de identidad</StepTitle>
-        <StepSubtitle>
-          Ingresa tu DNI para buscar tu cuenta en nuestro sistema
-        </StepSubtitle>
-      </StepHeader>
-
-      <Form onSubmit={handleSubmit(onSubmit)}>
-        <Row gutter={[16, 16]}>
-          <Col span={24}>
-            <Controller
-              name="dni"
-              control={control}
-              render={({ field: { onChange, value, name } }) => (
-                <Input
-                  label="Documento de Identidad (DNI)"
-                  placeholder="Ingresa 8 dígitos"
-                  value={value}
-                  onChange={(e) => {
-                    const cleaned = e.target.value.replace(/\D/g, "");
-                    onChange(cleaned);
-                  }}
-                  name={name}
-                  error={error(name)}
-                  helperText={errorMessage(name)}
-                  required={required(name)}
-                  maxLength={8}
-                  size="large"
-                  variant="outlined"
-                />
-              )}
-            />
-          </Col>
-
-          <Col span={24}>
-            <InfoBox>
-              <FontAwesomeIcon
-                icon={faShieldHalved}
-                style={{ marginRight: "0.5em" }}
-              />
-              Tu información está protegida y cifrada
-            </InfoBox>
-          </Col>
-
-          <Col span={24}>
-            <Button
-              type="primary"
-              htmlType="submit"
-              size="large"
-              block
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <FontAwesomeIcon icon={faSpinner} spin /> Verificando...
-                </>
-              ) : (
-                <>
-                  Continuar{" "}
-                  <FontAwesomeIcon
-                    icon={faArrowRight}
-                    style={{ marginLeft: "0.5em" }}
-                  />
-                </>
-              )}
-            </Button>
-          </Col>
-        </Row>
-      </Form>
-    </StepContainer>
-  );
-};
-
-// ============ STEP 2: MÉTODO DE VERIFICACIÓN ============
-type StepVerificationMethodProps = {
-  verificationMethod: VerificationMethod;
-  setVerificationMethod: (value: VerificationMethod) => void;
-  onNext: () => Promise<void>;
-  onBack: () => void;
-  loading: boolean;
-  user: User | null;
-};
-
-const StepVerificationMethod = ({
-  verificationMethod,
-  setVerificationMethod,
-  onNext,
-  onBack,
-  loading,
-  user,
-}: StepVerificationMethodProps) => {
-  const maskEmail = (email: string) => {
-    const [localPart, domain] = email.split("@");
-    return `${localPart.substring(0, 3)}***@${domain}`;
-  };
-
-  // const maskPhone = (prefix: string, phone: string) =>
-  //   `+${prefix} *** *** ${phone.slice(-3)}`;
-
-  return (
-    <StepContainer>
-      <StepHeader>
-        <StepTitle>Método de verificación</StepTitle>
-        <StepSubtitle>
-          Selecciona cómo deseas recibir tu código de seguridad
-        </StepSubtitle>
-      </StepHeader>
-
-      <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12}>
-          <MethodCard
-            selected={verificationMethod === "email"}
-            onClick={() => setVerificationMethod("email")}
-          >
-            <MethodIconCircle selected={verificationMethod === "email"}>
-              <FontAwesomeIcon icon={faEnvelope} />
-            </MethodIconCircle>
-            <MethodTitle>Correo Electrónico</MethodTitle>
-            <MethodSubtitle>
-              {user?.email ? maskEmail(user.email) : "ejemplo@*****.com"}
-            </MethodSubtitle>
-            <MethodCheck selected={verificationMethod === "email"}>
-              {verificationMethod === "email" && (
-                <FontAwesomeIcon icon={faCheckCircle} />
-              )}
-            </MethodCheck>
-          </MethodCard>
-        </Col>
-
-        <Col xs={24} sm={12}>
-          <MethodCard
-            selected={verificationMethod === "phone"}
-            onClick={() => setVerificationMethod("phone")}
-          >
-            <MethodIconCircle selected={verificationMethod === "phone"}>
-              <FontAwesomeIcon icon={faMobileAlt} />
-            </MethodIconCircle>
-            <MethodTitle>Número Celular</MethodTitle>
-            <MethodSubtitle>
-              {user?.phone ? user.phone.number : "+51 *** *** ***"}
-            </MethodSubtitle>
-            <MethodCheck selected={verificationMethod === "phone"}>
-              {verificationMethod === "phone" && (
-                <FontAwesomeIcon icon={faCheckCircle} />
-              )}
-            </MethodCheck>
-          </MethodCard>
-        </Col>
-
-        <Col span={24}>
-          <InfoBox>
-            <FontAwesomeIcon
-              icon={faShieldHalved}
-              style={{ marginRight: "0.5em" }}
-            />
-            Enviaremos un código de 6 dígitos que expira en 5 minutos
-          </InfoBox>
-        </Col>
-
-        <Col xs={24} sm={12}>
-          <Button size="large" block onClick={onBack}>
-            <FontAwesomeIcon
-              icon={faArrowLeft}
-              style={{ marginRight: "0.5em" }}
-            />
-            Atrás
-          </Button>
-        </Col>
-
-        <Col xs={24} sm={12}>
-          <Button
-            type="primary"
-            size="large"
-            block
-            onClick={onNext}
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <FontAwesomeIcon icon={faSpinner} spin /> Enviando...
-              </>
-            ) : (
-              <>
-                Enviar Código{" "}
-                <FontAwesomeIcon
-                  icon={faArrowRight}
-                  style={{ marginLeft: "0.5em" }}
-                />
-              </>
-            )}
-          </Button>
-        </Col>
-      </Row>
-    </StepContainer>
-  );
-};
-
-// ============ STEP 3: CÓDIGO DE VERIFICACIÓN ============
-type StepVerificationCodeProps = {
-  verificationMethod: VerificationMethod;
-  onBack: () => void;
-  onFinish: (code: string) => Promise<void>;
-  onResend: () => Promise<void>;
-  loading: boolean;
-};
-
-const StepVerificationCode = ({
-  verificationMethod,
-  onBack,
-  onFinish,
-  loading,
-}: StepVerificationCodeProps) => {
-  const [resendDisabled, setResendDisabled] = useState(false);
-  const [countdown, setCountdown] = useState(0);
-
-  const schema = yup.object({
-    code: yup
-      .string()
-      .required("El código es obligatorio")
-      .matches(/^\d{6}$/, "El código debe tener 6 dígitos"),
-  });
-
-  const {
-    handleSubmit,
-    control,
-    formState: { errors },
-    setValue,
-    watch,
-    reset,
-  } = useForm<CodeForm>({
-    resolver: yupResolver(schema),
-    defaultValues: { code: "" },
-  });
-
-  const { errorMessage } = useFormUtils({ errors, schema });
-  const codeValue = watch("code");
-
-  // ✅ Countdown para reenvío
-  useEffect(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      return () => clearTimeout(timer);
-    } else {
-      setResendDisabled(false);
-    }
-  }, [countdown]);
-
-  const onSubmit = async (formData: CodeForm) => {
-    try {
-      await onFinish(formData.code);
-    } catch (error) {
-      // ✅ Limpiar el código si falla
-      reset({ code: "" });
-    }
-  };
-
-  // ✅ Función para reenviar código
-  const handleResendCode = async () => {
-    setResendDisabled(true);
-    setCountdown(60); // 60 segundos de espera
-
-    try {
-      // TODO: Implementar lógica de reenvío
-
-      notification({
-        type: "info",
-        title: "Reenviando código",
-        description: "Por favor espera...",
-      });
-    } catch (error) {
-      setResendDisabled(false);
-      setCountdown(0);
-    }
-  };
-
-  return (
-    <StepContainer>
-      <StepHeader>
-        <StepIconWrapper>
-          <FontAwesomeIcon icon={faCheckCircle} />
-        </StepIconWrapper>
-        <StepTitle>Código de verificación</StepTitle>
-        <StepSubtitle>
-          Enviamos un código de 6 dígitos a tu{" "}
-          {verificationMethod === "email" ? "correo electrónico" : "celular"}
-        </StepSubtitle>
-      </StepHeader>
-
-      <Form onSubmit={handleSubmit(onSubmit)}>
-        <Row gutter={[16, 24]}>
-          <Col span={24}>
-            <Controller
-              name="code"
-              control={control}
-              render={({ field: { onChange, value } }) => (
-                <CodeInputWrapper>
-                  <InputCode
-                    value={value || ""}
-                    onChange={(code) => {
-                      onChange(code);
-                      setValue("code", code);
-                    }}
-                    numInputs={6}
-                    type="number"
-                    error={!!errors.code}
-                    helperText={errorMessage("code")}
-                  />
-                </CodeInputWrapper>
-              )}
-            />
-          </Col>
-
-          <Col span={24}>
-            <ResendSection>
-              <ResendText>¿No recibiste el código?</ResendText>
-              <ResendLink
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (!resendDisabled) {
-                    handleResendCode();
-                  }
-                }}
-                disabled={resendDisabled}
-              >
-                {resendDisabled
-                  ? `Reenviar en ${countdown}s`
-                  : "Reenviar código de verificación"}
-              </ResendLink>
-            </ResendSection>
-          </Col>
-
-          <Col span={24}>
-            <InfoBox>
-              <FontAwesomeIcon
-                icon={faShieldHalved}
-                style={{ marginRight: "0.5em" }}
-              />
-              El código expira en 5 minutos
-            </InfoBox>
-          </Col>
-
-          <Col xs={24} sm={12}>
-            <Button size="large" block onClick={onBack} disabled={loading}>
-              <FontAwesomeIcon
-                icon={faArrowLeft}
-                style={{ marginRight: "0.5em" }}
-              />
-              Atrás
-            </Button>
-          </Col>
-
-          <Col xs={24} sm={12}>
-            <Button
-              type="primary"
-              size="large"
-              block
-              htmlType="submit"
-              disabled={loading || codeValue.length !== 6}
-            >
-              {loading ? (
-                <>
-                  <FontAwesomeIcon icon={faSpinner} spin /> Verificando...
-                </>
-              ) : (
-                <>
-                  Ingresar{" "}
-                  <FontAwesomeIcon
-                    icon={faCheckCircle}
-                    style={{ marginLeft: "0.5em" }}
-                  />
-                </>
-              )}
-            </Button>
-          </Col>
-        </Row>
-      </Form>
-    </StepContainer>
-  );
-};
-
-// ============ STYLED COMPONENTS ============
 
 const LoginContainer = styled.div`
   display: grid;
@@ -846,169 +341,26 @@ const WelcomeSubtitle = styled.p`
 `;
 
 const StepsContent = styled.div`
-  min-height: 480px;
+  min-height: 300px;
 `;
 
-const StepContainer = styled.div`
-  animation: fadeInScale 0.4s ease;
-
-  @keyframes fadeInScale {
-    from {
-      opacity: 0;
-      transform: scale(0.96);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-`;
-
-const StepHeader = styled.div`
+const LoginLink = styled.div`
   text-align: center;
-  margin-bottom: 2.5em;
-`;
-
-const StepIconWrapper = styled.div`
-  width: 70px;
-  height: 70px;
-  margin: 0 auto 1.2em;
-  background: linear-gradient(135deg, ${theme.colors.primary} 0%, #f39c12 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.8em;
-  color: ${theme.colors.black};
-  box-shadow: 0 4px 24px ${theme.colors.primary}50;
-`;
-
-const StepTitle = styled.h3`
-  font-size: 1.7em;
-  font-weight: ${theme.font_weight.large};
-  color: ${theme.colors.font1};
-  margin: 0 0 0.4em;
-`;
-
-const StepSubtitle = styled.p`
+  margin-top: 2em;
+  padding-top: 2em;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
   color: ${theme.colors.font2};
-  margin: 0;
-  font-size: 1em;
-  line-height: 1.5;
-`;
+  font-size: 0.95em;
 
-const InfoBox = styled.div`
-  background: ${theme.colors.secondary};
-  border: 1px solid ${theme.colors.primary}30;
-  border-radius: ${theme.border_radius.small};
-  padding: 1em;
-  text-align: center;
-  color: ${theme.colors.font2};
-  font-size: 0.9em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  svg {
+  a {
     color: ${theme.colors.primary};
-  }
-`;
+    text-decoration: none;
+    font-weight: ${theme.font_weight.medium};
+    transition: opacity 0.2s ease;
 
-const MethodCard = styled.div<{ selected: boolean }>`
-  background: ${({ selected }) =>
-    selected
-      ? `linear-gradient(135deg, ${theme.colors.primary}20 0%, ${theme.colors.primary}08 100%)`
-      : theme.colors.secondary};
-  border: 2px solid
-    ${({ selected }) =>
-      selected ? theme.colors.primary : "rgba(255, 255, 255, 0.05)"};
-  border-radius: ${theme.border_radius.medium};
-  padding: 2em 1.5em;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  &:hover {
-    border-color: ${theme.colors.primary};
-    transform: translateY(-6px);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
-  }
-`;
-
-const MethodIconCircle = styled.div<{ selected: boolean }>`
-  width: 60px;
-  height: 60px;
-  margin: 0 auto 1em;
-  border-radius: 50%;
-  background: ${({ selected }) =>
-    selected
-      ? `linear-gradient(135deg, ${theme.colors.primary} 0%, #f39c12 100%)`
-      : theme.colors.dark};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5em;
-  color: ${({ selected }) =>
-    selected ? theme.colors.black : theme.colors.font2};
-  transition: all 0.3s ease;
-`;
-
-const MethodTitle = styled.h4`
-  color: ${theme.colors.font1};
-  font-size: 1.1em;
-  font-weight: ${theme.font_weight.medium};
-  margin: 0 0 0.5em;
-`;
-
-const MethodSubtitle = styled.p`
-  color: ${theme.colors.font2};
-  font-size: 0.9em;
-  margin: 0;
-`;
-
-const MethodCheck = styled.div<{ selected: boolean }>`
-  position: absolute;
-  top: 1em;
-  right: 1em;
-  font-size: 1.3em;
-  color: ${theme.colors.primary};
-  opacity: ${({ selected }) => (selected ? 1 : 0)};
-  transform: scale(${({ selected }) => (selected ? 1 : 0.5)});
-  transition: all 0.3s ease;
-`;
-
-const CodeInputWrapper = styled.div`
-  margin: 2em 0;
-`;
-
-const ResendSection = styled.div`
-  text-align: center;
-`;
-
-const ResendText = styled.p`
-  color: ${theme.colors.font2};
-  font-size: 0.95em;
-  margin: 0 0 0.5em;
-`;
-
-const ResendLink = styled.a<{ disabled?: boolean }>`
-  color: ${({ disabled }) =>
-    disabled ? theme.colors.gray : theme.colors.primary};
-  text-decoration: none;
-  font-weight: ${theme.font_weight.medium};
-  font-size: 0.95em;
-  transition: opacity 0.2s ease;
-  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
-  pointer-events: ${({ disabled }) => (disabled ? "none" : "auto")};
-
-  &:hover {
-    opacity: ${({ disabled }) => (disabled ? 1 : 0.8)};
-    text-decoration: ${({ disabled }) => (disabled ? "none" : "underline")};
+    &:hover {
+      opacity: 0.8;
+      text-decoration: underline;
+    }
   }
 `;

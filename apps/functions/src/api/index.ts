@@ -2,8 +2,7 @@ import cors from "cors";
 import express from "express";
 
 import assistancesRoutes from "./assistances/routes/assistances.routes";
-import quotationsRoutes from "./qu" +
-  "otations/routes/quotations.routes";
+import quotationsRoutes from "./quotations/routes/quotations.routes";
 import usersRoutes from "./users/routes/users.routes";
 
 const app: express.Application = express();

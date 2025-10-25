@@ -8,8 +8,6 @@ import { faShieldHalved } from "@fortawesome/free-solid-svg-icons";
 import styled from "styled-components";
 import { theme } from "../../styles";
 import { useState } from "react";
-import { setLocalStorage } from "../../utils";
-import { fetchUserByDni } from "../../firebase/collections";
 import { isEmpty } from "lodash";
 import { useAuthentication } from "../../providers";
 

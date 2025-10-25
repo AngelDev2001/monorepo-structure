@@ -73,7 +73,7 @@ export const AuthenticationProvider = ({
   const [loginLoading, setLoginLoading] = useState(false);
   const [verificationId, setVerificationId] = useState<string | null>(null);
   const [tempUser, setTempUser] = useState<User | null>(null);
-  const [confirmationResult, setConfirmationResult] = useState<any>(null); // ✅ NUEVO
+  const [confirmationResult, setConfirmationResult] = useState<any>(null);
 
   const { firebaseUser, firebaseUserLoading, firestoreDocId } =
     useFirebaseUser();
@@ -89,11 +89,7 @@ export const AuthenticationProvider = ({
   const authLoading = firebaseUserLoading || userLoading;
   const authError = userError;
 
-  console.log("firebaseUser: ", firebaseUser);
-
   const authUser: User | null = firebaseUser ? (user as User) : null;
-
-  console.log("authUser: ", authUser);
 
   useEffect(() => {
     authError && logout();
@@ -109,8 +105,6 @@ export const AuthenticationProvider = ({
   const findUserByDNI = async (dni: string): Promise<User | null> => {
     try {
       setLoginLoading(true);
-
-      console.log("🔍 Buscando usuario con DNI:", dni);
 
       const usersSnapshot = await firestore
         .collection("users")
@@ -136,9 +130,6 @@ export const AuthenticationProvider = ({
         id: userId,
       };
 
-      console.log("✅ Usuario encontrado:", foundUser);
-
-      // ✅ Guardar en estado (NO en localStorage)
       setTempUser(foundUser);
       setLoginLoading(false);
 
@@ -156,7 +147,6 @@ export const AuthenticationProvider = ({
     }
   };
 
-  // ========== STEP 2: Enviar código de verificación ==========
   const sendVerificationCode = async (
     user: {
       email?: string;
@@ -171,74 +161,46 @@ export const AuthenticationProvider = ({
       setLoginLoading(true);
 
       if (method === "phone") {
-        console.log("📱 Enviando código por SMS a:", user?.phone.number);
-
         const phoneNumber = `${user?.phone.prefix}${user?.phone.number}`;
 
-        // Limpiar verifier anterior
-        console.log("🧹 Limpiando verifier anterior...");
         if ((window as any).recaptchaVerifier) {
           try {
             await (window as any).recaptchaVerifier.clear();
             (window as any).recaptchaVerifier = null;
-          } catch (e) {
-            console.log("No se pudo limpiar verifier anterior");
-          }
+          } catch (e) {}
         }
 
-        // Eliminar y recrear el elemento
-        console.log("🗑️ Eliminando contenedor antiguo...");
         const oldContainer = document.getElementById("recaptcha-container");
         if (oldContainer) {
           oldContainer.remove();
         }
 
-        console.log("🆕 Creando nuevo contenedor...");
         const newContainer = document.createElement("div");
         newContainer.id = "recaptcha-container";
         document.body.appendChild(newContainer);
 
-        // Esperar
         await new Promise((resolve) => setTimeout(resolve, 500));
 
-        console.log("🔧 Creando nuevo RecaptchaVerifier...");
-
-        // Crear verifier
         const appVerifier = new firebase.auth.RecaptchaVerifier(
           "recaptcha-container",
           {
             size: "invisible",
-            callback: (response: any) => {
-              console.log("✅ reCAPTCHA resuelto", response);
-            },
-            "expired-callback": () => {
-              console.log("⏱️ reCAPTCHA expiró");
-            },
+            callback: (response: any) => {},
+            "expired-callback": () => {},
           },
           firebase.app()
         );
 
-        console.log("⏳ Renderizando verifier...");
         await appVerifier.render();
-        console.log("✅ Verifier renderizado");
 
-        // ❌ NO verificar widgetId, simplemente continuar
-        // Guardar referencia
         (window as any).recaptchaVerifier = appVerifier;
 
-        // Esperar más tiempo antes de enviar
-        console.log("⏰ Esperando para estabilizar...");
         await new Promise((resolve) => setTimeout(resolve, 1500));
 
-        console.log("📤 Enviando código de verificación...");
-
-        // ✅ Intentar enviar directamente
         const result = await auth.signInWithPhoneNumber(
           phoneNumber,
           appVerifier
         );
-
-        console.log("✅ Código enviado! Confirmation result:", result);
 
         setConfirmationResult(result);
         setVerificationId(result.verificationId);
@@ -254,18 +216,13 @@ export const AuthenticationProvider = ({
 
       setLoginLoading(false);
     } catch (e: any) {
-      console.error("❌ Error enviando código:", e);
-      console.error("❌ Error code:", e.code);
-      console.error("❌ Error message:", e.message);
+      console.error(e);
 
-      // Limpiar
       if ((window as any).recaptchaVerifier) {
         try {
           await (window as any).recaptchaVerifier.clear();
           (window as any).recaptchaVerifier = null;
-        } catch (cleanupError) {
-          console.log("Error limpiando:", cleanupError);
-        }
+        } catch (cleanupError) {}
       }
 
       let errorMessage = "No se pudo enviar el código";
@@ -290,7 +247,6 @@ export const AuthenticationProvider = ({
     }
   };
 
-  // ========== STEP 3: Verificar código ingresado ==========
   const verifyCode = async (code: string) => {
     try {
       setLoginLoading(true);
@@ -303,24 +259,13 @@ export const AuthenticationProvider = ({
         throw new Error("No hay usuario temporal guardado");
       }
 
-      console.log("🔐 Verificando código:", code);
-      console.log("👤 Usuario a vincular:", tempUser);
-
-      // ✅ Confirmar código SMS
       const result = await confirmationResult.confirm(code);
 
-      console.log("✅ Código verificado");
-      console.log("🔑 Firebase Auth UID:", result.user.uid);
-      console.log("📝 Documento Firestore ID:", tempUser.id);
-
-      // ✅✅ VINCULAR: Actualizar el documento EXISTENTE con el UID de Firebase
       await firestore.collection("users").doc(tempUser.id).update({
-        firebaseAuthUid: result.user.uid, // ✅ Guardar el UID como campo
+        firebaseAuthUid: result.user.uid,
         lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
         phoneVerified: true,
       });
-
-      console.log("✅ Usuario vinculado correctamente");
 
       await auth.setPersistence(authPersistence.LOCAL);
 
@@ -364,21 +309,17 @@ export const AuthenticationProvider = ({
     setConfirmationResult(null);
     setTempUser(null);
 
-    // Limpiar reCAPTCHA
     if ((window as any).recaptchaVerifier) {
       try {
         (window as any).recaptchaVerifier.clear();
         (window as any).recaptchaVerifier = null;
-      } catch (e) {
-        console.log("No se pudo limpiar verifier en logout");
-      }
+      } catch (e) {}
     }
 
     return auth.signOut();
   };
 
-  if (authLoading && location.pathname !== "/")
-    <Spinner fullscreen height="80vh" />;
+  if (authLoading && location.pathname !== "/") return <Spinner fullscreen />;
 
   return (
     <AuthenticationContext.Provider
@@ -409,7 +350,6 @@ const useFirebaseUser = () => {
       setFirebaseUser(user);
 
       if (user) {
-        // ✅ Buscar el documento por firebaseAuthUid
         try {
           const userSnapshot = await firestore
             .collection("users")
@@ -420,10 +360,10 @@ const useFirebaseUser = () => {
           if (!userSnapshot.empty) {
             setFirestoreDocId(userSnapshot.docs[0].id);
           } else {
-            console.error("❌ No se encontró documento para UID:", user.uid);
+            console.error("Not found document for uid:", user.uid);
           }
         } catch (error) {
-          console.error("❌ Error buscando usuario:", error);
+          console.error("Error searching for user:", error);
         }
       } else {
         setFirestoreDocId(null);
@@ -443,12 +383,3 @@ const isAuthUser = (data: unknown): data is User =>
 
 const isAuthUserError = (data: unknown) =>
   isObject(data) && "type" in data && data.type === "error";
-
-// const maskEmail = (email: string) => {
-//   const [user, domain] = email.split("@");
-//   return `${user.substring(0, 3)}***@${domain}`;
-// };
-
-// const maskPhone = (phone: string) => {
-//   return `*** *** ${phone?.slice(-3)}`;
-// };

@@ -5,6 +5,11 @@ interface DefaultFirestoreProps {
   isDeleted?: boolean;
 }
 
+export interface IdentityDocument {
+  type: "DNI" | "RUC" | "CE";
+  number: string;
+}
+
 interface Phone {
   prefix: string;
   number: string;
@@ -16,10 +21,7 @@ export interface User {
   paternalSurname: string;
   maternalSurname: string;
   email: string;
-  document: {
-    type: "DNI" | "RUC" | "CE";
-    number: string;
-  };
+  document: IdentityDocument;
   phone: Phone;
   gender: "male" | "female" | "other";
 }

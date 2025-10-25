@@ -1,4 +1,4 @@
-import styled, { css } from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 import {
   FontAwesomeIcon,
   type FontAwesomeIconProps,
@@ -13,56 +13,85 @@ interface SpinnerProps {
   message?: string | null;
 }
 
-export const Spinner = ({
+interface ContainerProps {
+  $fullscreen: boolean;
+  $height?: string;
+}
+
+export const Spinner: React.FC<SpinnerProps> = ({
   height,
   fullscreen = true,
   size = "6x",
   message = null,
-}: SpinnerProps) => (
-  <Container fullscreen={fullscreen} height={height}>
+}) => (
+  <Container $fullscreen={fullscreen} $height={height}>
     <div className="item">
-      <div>
+      <IconWrapper>
         <IconStyled spin icon={faCircleNotch} size={size} />
-      </div>
+      </IconWrapper>
       {message && (
-        <div className="message-item">
+        <MessageWrapper>
           <h3>{message}</h3>
-        </div>
+        </MessageWrapper>
       )}
     </div>
   </Container>
 );
 
-const Container = styled.section<Pick<SpinnerProps, "fullscreen" | "height">>`
-  ${({ fullscreen, height }) => css`
+const pulse = keyframes`
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+`;
+
+const Container = styled.section<ContainerProps>`
+  ${({ $fullscreen, $height }) => css`
     width: 100%;
-    height: ${height || (fullscreen ? "100%" : " calc(100% - 90px)")};
+    height: ${$height || ($fullscreen ? "100%" : "calc(100% - 90px)")};
     display: grid;
     place-items: center;
+    background: ${$fullscreen ? theme.colors.dark : "transparent"};
 
     .item {
       width: auto;
       height: auto;
-      padding: 1em;
+      padding: ${theme.paddings.x_large};
       margin: auto;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 1em;
-
-      .message-item {
-        h3 {
-          color: ${theme.colors.font1};
-          font-size: ${theme.font_sizes.large};
-        }
-      }
+      gap: ${theme.paddings.large};
     }
+  `}
+`;
+
+const IconWrapper = styled.div`
+  ${() => css`
+    animation: ${pulse} 2s ease-in-out infinite;
   `}
 `;
 
 const IconStyled = styled(FontAwesomeIcon)`
   ${() => css`
     color: ${theme.colors.primary};
+    filter: drop-shadow(0 0 20px ${theme.colors.primary}40);
+  `}
+`;
+
+const MessageWrapper = styled.div`
+  ${() => css`
+    text-align: center;
+    animation: ${pulse} 2s ease-in-out infinite;
+
+    h3 {
+      color: ${theme.colors.font1};
+      font-size: ${theme.font_sizes.large};
+      font-weight: ${theme.font_weight.medium};
+      margin: 0;
+    }
   `}
 `;

@@ -2,7 +2,7 @@ import InputAntd from "antd/lib/input";
 import type { InputProps as AntInputProps } from "antd";
 import { ComponentContainer } from "./component-container";
 
-interface InputPropsa extends Omit<AntInputProps, "variant"> {
+interface InputtProps extends Omit<AntInputProps, "variant"> {
   required?: boolean;
   hidden?: boolean;
   error?: boolean;
@@ -24,7 +24,7 @@ export const Input = ({
   animation,
   helperText,
   ...props
-}: InputPropsa) => {
+}: InputtProps) => {
   const Container = ComponentContainer[variant];
 
   return (

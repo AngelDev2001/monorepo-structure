@@ -3,17 +3,12 @@ import { Drawer, Menu } from "../ui";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faClipboardUser,
-  faFileAlt,
   faFileLines,
   faGears,
   faHome,
   faList,
-  faPoll,
-  faShapes,
   faSquarePlus,
-  faTicket,
   faUsers,
-  faUsersCog,
 } from "@fortawesome/free-solid-svg-icons";
 import { theme } from "../../styles";
 
@@ -69,23 +64,24 @@ export const DrawerLayout = ({
           label: "Usuarios",
           key: "users",
           icon: <FontAwesomeIcon icon={faUsers} size="lg" />,
+          onClick: () => onClickMenu("/users"),
         },
       ],
     },
     {
       label: "Cotizaciones",
-      key: "quotations-group", // ✅ Cambié de 'quotation' a 'quotations-group'
+      key: "quotations-group",
       icon: <FontAwesomeIcon icon={faFileLines} size="lg" />,
       children: [
         {
           label: "Crear Cotización",
-          key: "quotation-new", // ✅ Cambié de 'quotation' a 'quotation-new'
+          key: "quotation-new",
           icon: <FontAwesomeIcon icon={faSquarePlus} size="lg" />,
           onClick: () => onClickMenu("/quotations/new"),
         },
         {
           label: "Lista de cotizaciones",
-          key: "quotations-list", // ✅ Más descriptivo
+          key: "quotations-list",
           icon: <FontAwesomeIcon icon={faList} size="lg" />,
           onClick: () => onClickMenu("/quotations"),
         },
@@ -93,18 +89,18 @@ export const DrawerLayout = ({
     },
     {
       label: "Asistencias",
-      key: "assistances-group", // ✅ Cambié de 'assistance' a 'assistances-group'
+      key: "assistances-group",
       icon: <FontAwesomeIcon icon={faClipboardUser} size="lg" />,
       children: [
         {
           label: "Marcar asistencia",
-          key: "assistance-new", // ✅ Cambié de 'assistance' a 'assistance-new'
+          key: "assistance-new",
           icon: <FontAwesomeIcon icon={faSquarePlus} size="lg" />,
           onClick: () => onClickMenu("/assistances/new"),
         },
         {
           label: "Lista de asistencias",
-          key: "assistances-list", // ✅ Más descriptivo
+          key: "assistances-list",
           icon: <FontAwesomeIcon icon={faList} size="lg" />,
           onClick: () => onClickMenu("/assistances"),
         },
@@ -125,7 +121,7 @@ export const DrawerLayout = ({
     //       label: "Lista de Sorteos",
     //       key: "raffles-list",
     //       icon: <FontAwesomeIcon icon={faList} size="lg" />,
-    //       onClick: () => onClickMenu("/raffles"), // ✅ Corregí la ruta (estaba duplicada /raffles/new)
+    //       onClick: () => onClickMenu("/raffles"),
     //     },
     //   ],
     // },
@@ -243,7 +239,6 @@ const MenuContainer = styled.div`
     border-inline-end: none !important;
   }
 
-  /* Iconos del menú */
   .ant-menu-item-icon,
   .ant-menu-submenu-title .anticon {
     font-size: 1.1em;

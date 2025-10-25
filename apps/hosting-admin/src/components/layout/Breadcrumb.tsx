@@ -31,8 +31,9 @@ export const BreadcrumbLayout = () => {
 const BreadcrumbContainer = styled(Breadcrumb)`
   margin: 16px 0;
   padding: 0.8em 0;
+  display: flex;
+  align-items: center;
 
-  /* Items del breadcrumb */
   .ant-breadcrumb-link {
     color: ${theme.colors.font2};
     font-size: ${theme.font_sizes.small};
@@ -43,19 +44,18 @@ const BreadcrumbContainer = styled(Breadcrumb)`
     }
   }
 
-  /* Último item (activo) */
   li:last-child .ant-breadcrumb-link {
     color: ${theme.colors.font1};
     font-weight: ${theme.font_weight.medium};
+    display: flex;
+    align-items: center;
   }
 
-  /* Separadores */
   .ant-breadcrumb-separator {
     color: ${theme.colors.gray};
     margin: 0 0.5em;
   }
 
-  /* Primer item (home icon) */
   li:first-child .ant-breadcrumb-link {
     color: ${theme.colors.font2};
     display: flex;

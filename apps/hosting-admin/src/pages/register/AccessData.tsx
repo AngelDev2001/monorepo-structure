@@ -11,10 +11,10 @@ import { yupResolver } from "@hookform/resolvers/yup";
 
 type DocumentType = "dni" | "ruc" | "ce";
 
-interface UserRegister1 {
-  documentType: DocumentType;
-  documentNumber: string;
-}
+// interface Document {
+//   documentType: DocumentType;
+//   documentNumber: string;
+// }
 
 export const AccessData = ({ onNext }: { onNext: (user: any) => void }) => {
   const [documentType, setDocumentType] = useState<DocumentType>("dni");
@@ -51,7 +51,7 @@ export const AccessData = ({ onNext }: { onNext: (user: any) => void }) => {
     control,
     formState: { errors },
     watch,
-  } = useForm<UserRegister1>({
+  } = useForm<IdentityDocument>({
     resolver: yupResolver(schema),
     defaultValues: {
       documentType: "dni",
@@ -67,7 +67,7 @@ export const AccessData = ({ onNext }: { onNext: (user: any) => void }) => {
     setDocumentType(watchedDocType as DocumentType);
   }
 
-  const onSubmit = (formData: UserRegister1) => {
+  const onSubmit = (formData: IdentityDocument) => {
     onNext(formData);
   };
 

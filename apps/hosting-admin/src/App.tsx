@@ -1,13 +1,22 @@
-import { AuthenticationProvider, ConfigsInitializer } from "./providers";
+import {
+  AuthenticationProvider,
+  ConfigsInitializer,
+  GlobalDataProvider,
+  VersionProvider,
+} from "./providers";
 import { Router } from "./router";
 
 function App() {
   return (
-    <ConfigsInitializer>
-      <AuthenticationProvider>
-        <Router />
-      </AuthenticationProvider>
-    </ConfigsInitializer>
+    <VersionProvider>
+      <ConfigsInitializer>
+        <AuthenticationProvider>
+          <GlobalDataProvider>
+            <Router />
+          </GlobalDataProvider>
+        </AuthenticationProvider>
+      </ConfigsInitializer>
+    </VersionProvider>
   );
 }
 

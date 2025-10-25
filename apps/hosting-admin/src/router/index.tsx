@@ -1,19 +1,17 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import * as A from "../pages";
-import { AdminLayout } from "../components/layout";
+import { AdminLayout } from "../components";
 import { PrivateRoute } from "./PrivateRoute";
 import { PublicRoute } from "./PublicRoute";
 
 export function Router() {
   return (
     <Routes>
-      {/* ========== RUTAS PÚBLICAS ========== */}
       <Route element={<PublicRoute />}>
         <Route path="/" element={<A.Login />} />
         <Route path="/register" element={<A.Register />} />
       </Route>
 
-      {/* ========== RUTAS PRIVADAS ========== */}
       <Route element={<PrivateRoute />}>
         <Route
           path="/home"
@@ -40,7 +38,23 @@ export function Router() {
           }
         />
         <Route
+          path="/quotations/:quotationId"
+          element={
+            <AdminLayout>
+              <A.Quotations />
+            </AdminLayout>
+          }
+        />
+        <Route
           path="/assistances"
+          element={
+            <AdminLayout>
+              <A.Assistances />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/assistances/:assistanceId"
           element={
             <AdminLayout>
               <A.Assistances />
@@ -55,9 +69,16 @@ export function Router() {
             </AdminLayout>
           }
         />
+        <Route
+          path="/users/:userId"
+          element={
+            <AdminLayout>
+              <A.Users />
+            </AdminLayout>
+          }
+        />
       </Route>
 
-      {/* ========== RUTA 404 ========== */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

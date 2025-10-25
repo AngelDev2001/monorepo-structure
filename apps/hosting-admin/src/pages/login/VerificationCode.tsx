@@ -76,8 +76,6 @@ export const VerificationCode = ({
     setCountdown(60);
 
     try {
-      // TODO: Implementar lógica de reenvío
-
       notification({
         type: "info",
         title: "Reenviando código",

@@ -71,7 +71,6 @@ const LayoutContainer = styled(Layout)`
     background: rgba(255, 184, 77, 0.15);
   }
 
-  /* Spinner dark mode */
   .spin-item {
     .ant-spin-dot-item {
       background-color: ${theme.colors.primary};

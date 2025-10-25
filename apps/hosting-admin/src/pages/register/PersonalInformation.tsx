@@ -9,7 +9,7 @@ import {
   faSpinner,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
-import { useFormUtils } from "../../hooks/useFormUtils";
+import { useFormUtils } from "../../hooks";
 import styled from "styled-components";
 import { theme } from "../../styles";
 

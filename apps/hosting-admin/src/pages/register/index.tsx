@@ -9,24 +9,6 @@ import { useApiUserPost } from "../../api";
 import { PersonalInformation } from "./PersonalInformation.tsx";
 import { AccessData } from "./AccessData.tsx";
 
-interface User {
-  firstName: string;
-  paternalSurname: string;
-  maternalSurname: string;
-  email: string;
-  document: {
-    type: "DNI" | "RUC" | "CE";
-    number: string;
-  };
-  phone: {
-    prefix: string;
-    number: string;
-  };
-  profilePhoto?: string;
-  birthDate?: string;
-  gender?: "male" | "female" | "other";
-}
-
 export function Register() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
@@ -48,8 +30,6 @@ export function Register() {
       ...user,
     };
 
-    console.log("📝 Enviando datos de registro al backend:", fullData);
-
     try {
       const userData = {
         firstName: fullData.firstName,
@@ -69,8 +49,6 @@ export function Register() {
 
       const response = await postUser(userData);
 
-      console.log("✅ Respuesta del backend:", response);
-
       if (response && response.ok !== false) {
         notification({
           type: "success",
@@ -82,10 +60,10 @@ export function Register() {
           navigate("/");
         }, 2000);
       } else {
-        throw new Error("Error en el registro");
+        throw new Error("Error in the register");
       }
     } catch (error: any) {
-      console.error("❌ Error en registro:", error);
+      console.error("Error in register:", error);
 
       let errorMessage =
         "No se pudo completar el registro. Intenta nuevamente.";

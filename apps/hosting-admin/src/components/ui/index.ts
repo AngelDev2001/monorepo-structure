@@ -1,20 +1,25 @@
 import {
   Button,
+  Col,
+  Descriptions,
+  Divider,
   Drawer,
+  Dropdown,
+  Empty,
+  Image,
   Layout,
   Menu,
   Modal,
+  Popconfirm,
+  Result,
+  Row,
   Space,
   Spin,
-  theme,
-  Row,
-  Col,
   Table,
-  Popconfirm,
-  Empty,
-  Descriptions,
+  Tag,
+  theme,
   Typography,
-  Divider,
+  Tabs,
 } from "antd";
 
 export * from "./Legend";
@@ -25,6 +30,12 @@ export * from "./notification";
 export * from "./Spinner";
 export * from "./TextArea";
 export * from "./Select";
+export * from "./RadioGroup";
+export * from "./modalConfirm";
+export * from "./Title";
+export * from "./component-container";
+export * from "./IconAction";
+export * from "./AddButton";
 
 export {
   Layout,
@@ -43,4 +54,9 @@ export {
   Descriptions,
   Typography,
   Divider,
+  Result,
+  Dropdown,
+  Image,
+  Tag,
+  Tabs,
 };
